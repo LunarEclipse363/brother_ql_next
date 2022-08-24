@@ -17,7 +17,8 @@ The following printers are claimed to be supported (✓ means verified by the au
 * QL-600, QL-650TD
 * QL-700 (✓), QL-710W (✓), QL-720NW (✓)
 * QL-800 (✓), QL-810W (✓), QL-820NWB (✓)
-* QL-1050 (✓), QL-1060N (✓).
+* QL-1050 (✓), QL-1060N (✓)
+* QL-1100 (✓), QL-1100NWB, QL-1115NWB
 
 The new QL-800 series can print labels with two colors (black and red) on DK-22251 labels.
 
@@ -146,6 +147,7 @@ The available label names can be listed with `brother_ql info labels`:
      54         590           54mm endless
      62         696           62mm endless
      102       1164           102mm endless
+     103       1200           103mm endless
      17x54      165 x  566    17mm x 54mm die-cut
      17x87      165 x  956    17mm x 87mm die-cut
      23x23      202 x  202    23mm x 23mm die-cut
@@ -158,6 +160,7 @@ The available label names can be listed with `brother_ql info labels`:
      62x100     696 x 1109    62mm x 100mm die-cut
      102x51    1164 x  526    102mm x 51mm die-cut
      102x152   1164 x 1660    102mm x 153mm die-cut
+     103x164   1200 x 1822    103mm x 164mm die-cut
      d12         94 x   94    12mm round die-cut
      d24        236 x  236    24mm round die-cut
      d58        618 x  618    58mm round die-cut
