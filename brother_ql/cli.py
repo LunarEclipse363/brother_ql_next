@@ -3,6 +3,7 @@
 # Python standard library
 from __future__ import print_function
 import logging
+import json
 
 # external dependencies
 import click
@@ -118,6 +119,62 @@ def env(ctx, *args, **kwargs):
         spec = ' '.join(req.specs[0]) if req.specs else 'any'
         print(fmt.format(req=proj, spec=spec, ins_vers=req_pkg.version))
     print("\n##################\n")
+
+@cli.command('status', short_help='Request status information from the printer.')
+@click.pass_context
+def status_cmd(ctx, *args, **kwargs):
+    from brother_ql.backends import backend_factory, guess_backend
+    from brother_ql.reader import interpret_response
+    from brother_ql.raster import BrotherQLRaster
+    import time
+
+    printer_model = ctx.meta.get('MODEL')
+    printer_identifier=ctx.meta.get('PRINTER')
+    backend_identifier=ctx.meta.get('BACKEND')
+    if backend_identifier is None:
+        try:
+            backend_identifier = guess_backend(printer_identifier)
+        except:
+            logger.info("No backend stated. Selecting the default linux_kernel backend.")
+            backend_identifier = 'linux_kernel'
+    if backend_identifier == 'network':
+        logger.error("The network backend doesn't support the status command.")
+        return -1
+
+    be = backend_factory(backend_identifier)
+    list_available_devices = be['list_available_devices']
+    BrotherQLBackend       = be['backend_class']
+    printer = BrotherQLBackend(printer_identifier)
+
+    raster = BrotherQLRaster(printer_model)
+    raster.add_invalidate()
+    raster.add_status_information()
+    instructions = raster.data
+
+    start = time.time()
+    logger.info('Sending instructions to the printer. Total: %d bytes.', len(instructions))
+    printer.write(instructions)
+
+    result = None
+    while time.time() - start < 10:
+        data = printer.read()
+        if not data:
+            time.sleep(0.005)
+            continue
+        try:
+            result = interpret_response(data)
+        except ValueError:
+            logger.error("TIME %.3f - Couln't understand response: %s", time.time()-start, data)
+            continue
+        logger.debug('TIME %.3f - result: %s', time.time()-start, result)
+        if result['status_type'] == 'Reply to status request':
+            break
+
+    if result is None:
+        logger.error("Received no data.")
+        return -1
+
+    print(json.dumps(result, indent=2))
 
 @cli.command('print', short_help='Print a label')
 @click.argument('images', nargs=-1, type=click.File('rb'), metavar='IMAGE [IMAGE] ...')
