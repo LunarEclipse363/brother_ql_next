@@ -7,6 +7,7 @@ import json
 
 # external dependencies
 import click
+import jsons
 
 # imports from this very package
 from brother_ql.devicedependent import models, label_sizes, label_type_specs, DIE_CUT_LABEL, ENDLESS_LABEL, ROUND_DIE_CUT_LABEL
@@ -60,22 +61,32 @@ def info(ctx, *args, **kwargs):
     """ list available labels, models etc. """
 
 @info.command(name='models')
+@click.option("--json", is_flag=True)
 @click.pass_context
 def models_cmd(ctx, *args, **kwargs):
     """
     List the choices for --model
     """
-    print('Supported models:')
-    for model in models: print(" " + model)
+    if kwargs["json"]:
+        import brother_ql.models as new_models
+        print(jsons.dumps(new_models.ALL_MODELS, jdkwargs={"indent": 2}))
+    else:
+        print('Supported models:')
+        for model in models: print(" " + model)
 
 @info.command()
+@click.option("--json", is_flag=True)
 @click.pass_context
 def labels(ctx, *args, **kwargs):
     """
     List the choices for --label
     """
-    from brother_ql.output_helpers import textual_label_description
-    print(textual_label_description(label_sizes))
+    if kwargs["json"]:
+        import brother_ql.labels as new_labels
+        print(jsons.dumps(new_labels.ALL_LABELS, jdkwargs={"indent": 2}))
+    else:
+        from brother_ql.output_helpers import textual_label_description
+        print(textual_label_description(label_sizes))
 
 @info.command()
 @click.pass_context
