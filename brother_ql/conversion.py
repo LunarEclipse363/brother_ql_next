@@ -12,7 +12,6 @@ from brother_ql.raster import BrotherQLRaster
 from brother_ql.devicedependent import ENDLESS_LABEL, DIE_CUT_LABEL, ROUND_DIE_CUT_LABEL, PTOUCH_ENDLESS_LABEL
 from brother_ql.devicedependent import label_type_specs, right_margin_addition
 from brother_ql import BrotherQLUnsupportedCmd
-from brother_ql.image_trafos import filtered_hsv
 
 logger = logging.getLogger(__name__)
 
@@ -197,3 +196,25 @@ def convert(qlr, images, label,  **kwargs):
         qlr.add_print()
 
     return qlr.data
+
+
+def filtered_hsv(im, filter_h, filter_s, filter_v, default_col=(255,255,255)):
+    """ https://stackoverflow.com/a/22237709/183995 """
+
+    hsv_im = im.convert('HSV')
+    H, S, V = 0, 1, 2
+    hsv = hsv_im.split()
+    mask_h = hsv[H].point(filter_h)
+    mask_s = hsv[S].point(filter_s)
+    mask_v = hsv[V].point(filter_v)
+
+    Mdat = []
+    for h, s, v in zip(mask_h.getdata(), mask_s.getdata(), mask_v.getdata()):
+        Mdat.append(255 if (h and s and v) else 0)
+
+    mask = mask_h
+    mask.putdata(Mdat)
+
+    filtered_im = Image.new("RGB", im.size, color=default_col)
+    filtered_im.paste(im, None, mask)
+    return filtered_im
