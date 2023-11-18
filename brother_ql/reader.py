@@ -38,10 +38,6 @@ OPCODES = {
     b'\x80\x20\x42':         ('status response',29, "A status response received from the printer"),
 }
 
-dot_widths = {
-  62: 90*8,
-}
-
 RESP_ERROR_INFORMATION_1_DEF = {
   0: 'No media when printing',
   1: 'End of media (die-cut size only)',
@@ -66,7 +62,7 @@ RESP_ERROR_INFORMATION_2_DEF = {
 
 RESP_MEDIA_TYPES = {
   0x00: 'No media',
-  0x01: 'Laminated Tape',
+  0x01: 'Laminated continuous length tape',
   0x0A: 'Continuous length tape',
   0x0B: 'Die-cut labels',
 }
@@ -84,12 +80,35 @@ RESP_PHASE_TYPES = {
   0x01: 'Printing state',
 }
 
+RESP_MODEL_CODES = {
+  0x4f: 'QL-500/QL-550',
+  0x31: 'QL-560',
+  0x32: 'QL-570',
+  0x33: 'QL-580N',
+  0x47: 'QL-600',
+  0x51: 'QL-650TD',
+  0x35: 'QL-700',
+  0x36: 'QL-710W',
+  0x37: 'QL-720NW',
+  0x38: 'QL-800',
+  0x39: 'QL-810W',
+  0x41: 'QL-820NWB',
+  0x50: 'QL-1050',
+  0x34: 'QL-1060N',
+  0x43: 'QL-1100',
+  0x44: 'QL-1100NWB',
+  0x45: 'QL-1115NWB',
+  0x68: 'PT-P750W',
+  0x69: 'PT-P900W',
+  0x70: 'PT-P950NW',
+}
+
 RESP_BYTE_NAMES = [
   'Print head mark',
   'Size',
   'Fixed (B=0x42)',
-  'Device dependent',
-  'Device dependent',
+  'Series Code',
+  'Model Code',
   'Fixed (0=0x30)',
   'Fixed (0x00 or 0=0x30)',
   'Fixed (0x00)',
@@ -178,6 +197,13 @@ def interpret_response(data):
             logger.error('Error: ' + RESP_ERROR_INFORMATION_2_DEF[error_bit])
             errors.append(RESP_ERROR_INFORMATION_2_DEF[error_bit])
 
+    model_code  = data[4]
+    if model_code in RESP_MODEL_CODES:
+        model_code = RESP_MODEL_CODES[model_code]
+        logger.debug("Model name: %s", model_code)
+    else:
+        logger.error("Unknown model code %02X", model_code)
+
     media_width  = data[10]
     media_length = data[17]
 
@@ -205,6 +231,7 @@ def interpret_response(data):
     response = {
       'status_type': status_type,
       'phase_type': phase_type,
+      'model_name': model_code,
       'media_type': media_type,
       'media_width': media_width,
       'media_length': media_length,
@@ -225,7 +252,7 @@ def merge_specific_instructions(chunks, join_preamble=True, join_raster=True):
         opcode = match_opcode(instruction)
         if   join_preamble and OPCODES[opcode][0] == 'preamble' and last_opcode == 'preamble':
             instruction_buffer += instruction
-        elif join_raster   and 'raster' in OPCODES[opcode][0] and 'raster' in last_opcode:
+        elif join_raster and 'raster' in OPCODES[opcode][0] and 'raster' in last_opcode:
             instruction_buffer += instruction
         else:
             if instruction_buffer:

@@ -4,6 +4,8 @@
 from __future__ import print_function
 import logging
 import json
+import base64
+import sys
 
 # external dependencies
 import click
@@ -69,7 +71,7 @@ def models_cmd(ctx, *args, **kwargs):
     """
     if kwargs["json"]:
         import brother_ql.models as new_models
-        print(jsons.dumps(new_models.ALL_MODELS, jdkwargs={"indent": 2}))
+        print(jsons.dumps(new_models.ALL_MODELS))
     else:
         print('Supported models:')
         for model in models: print(" " + model)
@@ -83,7 +85,7 @@ def labels(ctx, *args, **kwargs):
     """
     if kwargs["json"]:
         import brother_ql.labels as new_labels
-        print(jsons.dumps(new_labels.ALL_LABELS, jdkwargs={"indent": 2}))
+        print(jsons.dumps(new_labels.ALL_LABELS))
     else:
         from brother_ql.output_helpers import textual_label_description
         print(textual_label_description(label_sizes))
@@ -132,6 +134,7 @@ def env(ctx, *args, **kwargs):
     print("\n##################\n")
 
 @cli.command('status', short_help='Request status information from the printer.')
+@click.option('-f', '--format', type=click.Choice(('default', 'json', 'raw_bytes', 'raw_base64', 'raw_hex')), default='default', help='Output Format.')
 @click.pass_context
 def status_cmd(ctx, *args, **kwargs):
     from brother_ql.backends import backend_factory, guess_backend
@@ -140,6 +143,9 @@ def status_cmd(ctx, *args, **kwargs):
     import time
 
     printer_model = ctx.meta.get('MODEL')
+    if printer_model is None:
+        # QL-800 because it has the largest number of required invalidate bytes
+        printer_model = "QL-800"
     printer_identifier=ctx.meta.get('PRINTER')
     backend_identifier=ctx.meta.get('BACKEND')
     if backend_identifier is None:
@@ -149,11 +155,12 @@ def status_cmd(ctx, *args, **kwargs):
             logger.info("No backend stated. Selecting the default linux_kernel backend.")
             backend_identifier = 'linux_kernel'
     if backend_identifier == 'network':
-        logger.error("The network backend doesn't support the status command.")
+        # TODO: technically you can get status info via SNMP but this is unimplemnted
+        logger.error("The network backend currently doesn't support the status command.")
         return -1
 
     be = backend_factory(backend_identifier)
-    list_available_devices = be['list_available_devices']
+    list_available_devices = be['list_available_devices'] # This can be used for autodetecting printers
     BrotherQLBackend       = be['backend_class']
     printer = BrotherQLBackend(printer_identifier)
 
@@ -167,6 +174,7 @@ def status_cmd(ctx, *args, **kwargs):
     printer.write(instructions)
 
     result = None
+    data = b""
     while time.time() - start < 10:
         data = printer.read()
         if not data:
@@ -175,7 +183,7 @@ def status_cmd(ctx, *args, **kwargs):
         try:
             result = interpret_response(data)
         except ValueError:
-            logger.error("TIME %.3f - Couln't understand response: %s", time.time()-start, data)
+            logger.error("TIME %.3f - Couldn't understand response: %s", time.time()-start, data)
             continue
         logger.debug('TIME %.3f - result: %s', time.time()-start, result)
         if result['status_type'] == 'Reply to status request':
@@ -185,7 +193,27 @@ def status_cmd(ctx, *args, **kwargs):
         logger.error("Received no data.")
         return -1
 
-    print(json.dumps(result, indent=2))
+    match kwargs['format']:
+        case 'default':
+            print("Printer Status:")
+            print(f"* Status Type: {result['status_type']}")
+            print(f"* Phase Type: {result['phase_type']}")
+            print(f"* Model: {result['model_name']}")
+            print(f"* Media Type: {result['media_type']}")
+            print(f"* Media Width: {result['media_width']}")
+            print(f"* Media Length: {result['media_length']}")
+            if len(result["errors"]) > 0:
+                print(f"* Errors: {result['media_length']}")
+                for e in result["errors"]:
+                    print(f"  + {e}")
+        case 'json':
+            print(json.dumps(result))
+        case 'raw_bytes':
+            sys.stdout.buffer.write(data)
+        case 'raw_base64':
+            sys.stdout.buffer.write(base64.encodebytes(data))
+        case 'raw_hex':
+            print(data.hex())
 
 @cli.command('print', short_help='Print a label')
 @click.argument('images', nargs=-1, type=click.File('rb'), metavar='IMAGE [IMAGE] ...')
