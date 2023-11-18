@@ -27,25 +27,28 @@ printer_help = "The identifier for the printer. This could be a string like tcp:
 @click.option('--debug', is_flag=True)
 @click.version_option()
 @click.pass_context
-def cli(ctx, *args, **kwargs):
+def cli(ctx: click.Context, *args, **kwargs):
     """ Command line interface for the brother_ql Python package. """
 
-    backend = kwargs.get('backend', None)
-    model = kwargs.get('model', None)
-    printer = kwargs.get('printer', None)
+    backend = kwargs.get('backend')
+    model = kwargs.get('model')
+    printer = kwargs.get('printer')
     debug = kwargs.get('debug')
 
     # Store the general CLI options in the context meta dictionary.
-    # The name corresponds to the second half of the respective envvar:
-    ctx.meta['MODEL'] = model
-    ctx.meta['BACKEND'] = backend
-    ctx.meta['PRINTER'] = printer
+    # The name corresponds to the second half of the respective envvar.
+    #
+    # Setting a dict value to None is distinct from not setting it at all
+    # If we set it to None, get(val, default) will return None instead of default
+    if model is not None: ctx.meta['MODEL'] = model
+    if backend is not None: ctx.meta['BACKEND'] = backend
+    if printer is not None: ctx.meta['PRINTER'] = printer
 
     logging.basicConfig(level='DEBUG' if debug else 'INFO')
 
 @cli.command()
 @click.pass_context
-def discover(ctx):
+def discover(ctx: click.Context):
     """ find connected label printers """
     backend = ctx.meta.get('BACKEND', 'pyusb')
     discover_and_list_available_devices(backend)
@@ -59,13 +62,13 @@ def discover_and_list_available_devices(backend):
 
 @cli.group()
 @click.pass_context
-def info(ctx, *args, **kwargs):
+def info(ctx: click.Context, *args, **kwargs):
     """ list available labels, models etc. """
 
 @info.command(name='models')
 @click.option("--json", is_flag=True)
 @click.pass_context
-def models_cmd(ctx, *args, **kwargs):
+def models_cmd(ctx: click.Context, *args, **kwargs):
     """
     List the choices for --model
     """
@@ -79,7 +82,7 @@ def models_cmd(ctx, *args, **kwargs):
 @info.command()
 @click.option("--json", is_flag=True)
 @click.pass_context
-def labels(ctx, *args, **kwargs):
+def labels(ctx: click.Context, *args, **kwargs):
     """
     List the choices for --label
     """
@@ -92,7 +95,7 @@ def labels(ctx, *args, **kwargs):
 
 @info.command()
 @click.pass_context
-def env(ctx, *args, **kwargs):
+def env(ctx: click.Context, *args, **kwargs):
     """
     print debug info about running environment
     """
@@ -136,16 +139,14 @@ def env(ctx, *args, **kwargs):
 @cli.command('status', short_help='Request status information from the printer.')
 @click.option('-f', '--format', type=click.Choice(('default', 'json', 'raw_bytes', 'raw_base64', 'raw_hex')), default='default', help='Output Format.')
 @click.pass_context
-def status_cmd(ctx, *args, **kwargs):
+def status_cmd(ctx: click.Context, *args, **kwargs):
     from brother_ql.backends import backend_factory, guess_backend
     from brother_ql.reader import interpret_response
     from brother_ql.raster import BrotherQLRaster
     import time
 
-    printer_model = ctx.meta.get('MODEL')
-    if printer_model is None:
-        # QL-800 because it has the largest number of required invalidate bytes
-        printer_model = "QL-800"
+    # QL-800 because it has the largest number of required invalidate bytes
+    printer_model = ctx.meta.get('MODEL', "QL-800")
     printer_identifier=ctx.meta.get('PRINTER')
     backend_identifier=ctx.meta.get('BACKEND')
     if backend_identifier is None:
@@ -227,7 +228,7 @@ def status_cmd(ctx, *args, **kwargs):
 @click.option('--lq', is_flag=True, help='Print with low quality (faster). Default is high quality.')
 @click.option('--no-cut', is_flag=True, help="Don't cut the tape after printing the label.")
 @click.pass_context
-def print_cmd(ctx, *args, **kwargs):
+def print_cmd(ctx: click.Context, *args, **kwargs):
     """ Print a label of the provided IMAGE. """
     backend = ctx.meta.get('BACKEND', 'pyusb')
     model = ctx.meta.get('MODEL')
@@ -246,16 +247,18 @@ def print_cmd(ctx, *args, **kwargs):
 @click.argument('instructions', type=click.File('rb'))
 @click.option('-f', '--filename-format', help="Filename format string. Default is: label{counter:04d}.png.")
 @click.pass_context
-def analyze_cmd(ctx, *args, **kwargs):
+def analyze_cmd(ctx: click.Context, *args, **kwargs):
     from brother_ql.reader import BrotherQLReader
-    br = BrotherQLReader(kwargs.get('instructions'))
-    if kwargs.get('filename_format'): br.filename_fmt = kwargs.get('filename_format')
-    br.analyse()
+    reader = BrotherQLReader(kwargs['instructions'])
+    filename_format = kwargs.get('filename_format') 
+    if filename_format is not None:
+        reader.filename_fmt = filename_format
+    reader.analyse()
 
 @cli.command(name='send', short_help='send an instruction file to the printer')
 @click.argument('instructions', type=click.File('rb'))
 @click.pass_context
-def send_cmd(ctx, *args, **kwargs):
+def send_cmd(ctx: click.Context, *args, **kwargs):
     from brother_ql.backends.helpers import send
     send(instructions=kwargs['instructions'].read(), printer_identifier=ctx.meta.get('PRINTER'), backend_identifier=ctx.meta.get('BACKEND'), blocking=True)
 

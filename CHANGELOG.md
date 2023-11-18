@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A `status` subcommand to query the printer status
 - Optional json output for the `info labels` and `info models` subcommands
 
+### Fixed
+- The backend and other global options are now properly set to their default values
+
 ### Removed
 - Deprecation Warning
 
