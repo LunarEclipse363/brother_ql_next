@@ -4,9 +4,14 @@ version = "0.10.0-alpha"
 description = "Python package to talk to Brother QL label printers"
 readme = "README.md"
 authors = [
-    { name = "Philipp Klaus", email = "philipp.l.klaus@web.de" }
+    { name = "Philipp Klaus", email = "philipp.l.klaus@web.de" },
+    { name = "LunarEclipse", email = "luna@lunareclipse.zone" },
+]
+maintainers = [
+    { name = "LunarEclipse", email = "luna@lunareclipse.zone" },
 ]
 license = { text = "GPL-3.0-only" }
+requires-python = ">=3.10"
 dependencies = [
     "click",
     "future",
@@ -14,8 +19,8 @@ dependencies = [
     "pillow>=3.3.0",
     "pyusb",
     "attrs",
-    "typing;python_version<'3.5'",
-    "enum34;python_version<'3.4'",
+    "typing",
+    "enum34",
     "jsons",
 ]
 keywords = [
@@ -56,4 +61,4 @@ brother_ql_debug = "brother_ql.brother_ql_debug:main"
 brother_ql_info = "brother_ql.brother_ql_info:main"
 
 [project.urls]
-repository = "https://github.com/pklaus/brother_ql"
+repository = "https://github.com/LunarEclipse363/brother_ql"

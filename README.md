@@ -1,3 +1,17 @@
+## Fork Notice
+The status of the upstream project [is currently unknown](https://github.com/pklaus/brother_ql/issues/135),
+it doesn't seem to be active anymore, thus I have decided to fork it and improve upon it.
+
+### Goals
+- Adding new features
+- Improving the API and cleaning up the code
+- Creating API documentation
+- Removing legacy code
+
+### Notable Changes
+See [the CHANGELOG file](./CHANGELOG.md)
+
+
 ## brother\_ql
 
 A Python package to control Brother QL label printers.
@@ -25,9 +39,6 @@ The new QL-800 series can print labels with two colors (black and red) on DK-222
 Note: If your printer has an 'Editor Lite' mode, you need to disable it if you want to print via USB.
 Make sure that the corresponding LED is not lit by holding the button down until it turns off.
 
-If you're interested in printing labels using a web interface, check out [brother\_ql\_web][],
-which builds upon this package.
-
 ## Why
 
 The special feature of this package is that no printer driver is required for it to work.
@@ -43,19 +54,18 @@ This is where brother\_ql comes into the game.
 
 ## Installation
 
-brother\_ql is [available on the Python Package Index][PyPI] to be installed with pip:
+To install the latest release:
 
-    pip install --upgrade brother_ql
+    pip install --upgrade https://github.com/LunarEclipse363/brother_ql/archive/refs/tags/v0.10.0.zip
 
 The upgrade flag makes sure, you get the latest version of brother\_ql but also
 of its dependencies.
 
 Alternatively, you can install the latest version from Github using:
 
-    pip install --upgrade https://github.com/pklaus/brother_ql/archive/master.zip
+    pip install --upgrade https://github.com/LunarEclipse363/brother_ql/archive/master.zip
 
-This package was mainly created for use with Python 3.
-The essential functionality, however, will also work with Python 2: the creation of label files.
+This package will support Python 3.10+
 
 In order to run the `brother_ql` command line utility, the directory it resides in
 needs to be in the PATH envirnoment variable.
@@ -201,14 +211,21 @@ Notes:
 
 For a long time, this project provided multiple command line tools, such as
 `brother_ql_create`, `brother_ql_print`, `brother_ql_analyze`, and more.
-The overview of those tools can still be found in the [LEGACY][] documentation.
+The overview of those tools can still be found in the [LEGACY](./LEGACY.md) documentation.
 The use of these tools is now considered deprecated and they will be
 removed in a future release.
 
-## Author
+## Authors
 
-This software package was written by Philipp Klaus based on Brother's documentation
-of its raster language and based on additinal reverse engineering efforts.
+This software package was written based on Brother's documentation
+of its raster language and based on additional reverse engineering efforts.
+
+**Current Maintainers:**
+
+* LunarEclipse  
+  <luna@lunareclipse.zone>
+
+**Special thanks to:**
 
 * Philipp Klaus  
   <philipp.l.klaus@web.de>
@@ -221,23 +238,15 @@ improving the code and helping out financially.
 There are many ways to support the development of brother\_ql:
 
 * **File an issue** on Github, if you encounter problems, have a proposal, etc.
-* **Send an email with ideas** to the author.
 * **Submit a pull request** on Github if you improved the code and know how to use git.
-* **Finance a label printer** from the [author's wishlist][] to allow him to extend the device coverage and testing.
-* **Donate** an arbitrary amount of money for the development of brother\_ql [via Paypal][donation].
 
 Thanks to everyone helping to improve brother\_ql.
 
 ## Links
 
-* The source code and issue tracker of this package is to be found on **Github**: [pklaus/brother\_ql][].
-* The package is also to be found on the Python Package Index **PyPI**: [brother\_ql][PyPI].
+* The source code and issue tracker of this package is to be found on **Github**: [lunareclipse363/brother\_ql][].
+* There is no pypi release yet.
 * A curated list of related and unrelated software can be found [in this document][related-unrelated].
 
-[author's wishlist]: https://www.amazon.de/registry/wishlist/3GSVLPF08AFIR
-[donation]: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=philipp.klaus@gmail.com&lc=US&item_name=Donation+to+brother_ql+Development&no_note=0&cn=&currency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted
-[brother\_ql\_web]: https://github.com/pklaus/brother_ql_web
-[LEGACY]: https://github.com/pklaus/brother_ql/blob/master/LEGACY.md
-[pklaus/brother\_ql]: https://github.com/pklaus/brother_ql
-[PyPI]: https://pypi.python.org/pypi/brother_ql
+[lunareclipse363/brother\_ql]: https://github.com/LunarEclipse363/brother_ql
 [related-unrelated]: https://gist.github.com/pklaus/aeb55e18d36690df6a84a3eab49e9fd7
