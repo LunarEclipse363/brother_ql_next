@@ -7,6 +7,10 @@ it doesn't seem to be active anymore, thus I have decided to fork it and improve
 - Improving the API and cleaning up the code
 - Creating API documentation
 - Removing legacy code
+- I will not add support for PT-series printers,
+  because for them every printer needs a completely separate definition of labels,
+  while for QL-series printers, all the label-specific offsets and such stay the same across models,
+  thus, the data model used in this package just doesn't fit PT-series printers.
 
 ### Notable Changes
 See [the CHANGELOG file](./CHANGELOG.md)

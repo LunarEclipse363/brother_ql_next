@@ -8,9 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Support for P-Touch series files in the `analyze` subcommand
-- Initial Support for the PT-P750W printer
-- Initial Support for the PT-P950NW printer [matmair/brother_ql-inventree #6](https://github.com/matmair/brother_ql-inventree/pull/6), [matmair/brother_ql-inventree #21](https://github.com/matmair/brother_ql-inventree/pull/21)
 - A `status` subcommand to query the printer status
 - Optional json output for the `info labels` and `info models` subcommands
 

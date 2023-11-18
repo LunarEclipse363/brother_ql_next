@@ -16,10 +16,8 @@ OPCODES = {
     # signature              name    following bytes   description
     b'\x00':                 ("preamble",       -1, "Preamble, 200-300x 0x00 to clear comamnd buffer"),
     b'\x4D':                 ("compression",     1, ""),
-    b'\x67':                 ("raster QL",         -1, ""),
-    b'\x47':                 ("raster P-touch",    -1, ""),
-    b'\x77':                 ("2-color raster QL", -1, ""),
-    b'\x5a':                 ("zero raster",     0, "empty raster line"),
+    b'\x67':                 ("raster",         -1, ""),
+    b'\x77':                 ("2-color raster", -1, ""),
     b'\x0C':                 ("print",           0, "print intermediate page"),
     b'\x1A':                 ("print",           0, "print final page"),
     b'\x1b\x40':             ("init",            0, "initialization"),
@@ -33,7 +31,6 @@ OPCODES = {
     b'\x1b\x69\x55\x77\x01': ('amedia',        127, "Additional media information command"),
     b'\x1b\x69\x55\x4A':     ('jobid',          14, "Job ID setting command"),
     b'\x1b\x69\x58\x47':     ("request_config",  0, "Request transmission of .ini config file of printer"),
-    b'\x1b\x69\x6B\x63':     ("number_of_copies",  2, "Internal specification commands"),
     b'\x1b\x69\x53':         ('status request',  0, "A status information request sent to the printer"),
     b'\x80\x20\x42':         ('status response',29, "A status response received from the printer"),
 }
@@ -62,7 +59,6 @@ RESP_ERROR_INFORMATION_2_DEF = {
 
 RESP_MEDIA_TYPES = {
   0x00: 'No media',
-  0x01: 'Laminated continuous length tape',
   0x0A: 'Continuous length tape',
   0x0B: 'Die-cut labels',
 }
@@ -162,15 +158,12 @@ def chunker(data, raise_exception=False):
         opcode_def = OPCODES[opcode]
         num_bytes = len(opcode)
         if opcode_def[1] > 0: num_bytes += opcode_def[1]
-        elif opcode_def[0] in ('raster QL', '2-color raster QL'):
+        if 'raster' in opcode_def[0]:
             num_bytes += data[2] + 2
-        elif opcode_def[0] in ('raster P-touch',):
-            num_bytes += data[1] + data[2]*256 + 2
         #payload = data[len(opcode):num_bytes]
         instructions.append(data[:num_bytes])
-        yield instructions[-1]
         data = data[num_bytes:]
-    #return instructions
+    return instructions
 
 def match_opcode(data):
     matching_opcodes = [opcode for opcode in OPCODES.keys() if data.startswith(opcode)]
@@ -296,11 +289,7 @@ class BrotherQLReader(object):
                     logger.info(" {} ({}) --> found! (payload: {})".format(opcode_def[0], hex_format(opcode), hex_format(payload)))
                     if opcode_def[0] == 'compression':
                         self.compression = payload[0] == 0x02
-                    if opcode_def[0] == 'zero raster':
-                        self.black_rows.append(bytes())
-                        if self.two_color_printing:
-                            self.red_rows.append(bytes())
-                    if opcode_def[0] in ('raster QL', '2-color raster QL', 'raster P-touch'):
+                    if 'raster' in opcode_def[0]:
                         rpl = bytes(payload[2:]) # raster payload
                         if self.compression:
                             row = bytes()
@@ -320,7 +309,7 @@ class BrotherQLReader(object):
                                 if index >= len(rpl): break
                         else:
                             row = rpl
-                        if opcode_def[0] in ('raster QL', 'raster P-touch'):
+                        if opcode_def[0] == 'raster':
                             self.black_rows.append(row)
                         else: # 2-color
                             if   payload[0] == 0x01:
@@ -344,24 +333,15 @@ class BrotherQLReader(object):
                         logger.info("Len of red   rows: %d", len(self.red_rows))
                         def get_im(rows):
                             if not len(rows): return None
-                            width_dots  = max(len(row) for row in rows)
-                            height_dots = len(rows)
-                            size = (width_dots*8, height_dots)
-                            expanded_rows = []
-                            for row in rows:
-                                if len(row) == 0:
-                                    expanded_rows.append(b'\x00'*width_dots)
-                                else:
-                                    expanded_rows.append(row)
-                            data = bytes(b''.join(expanded_rows))
+                            size = (len(rows[0])*8, len(rows))
+                            data = bytes(b''.join(rows))
                             data = bytes([2**8 + ~byte for byte in data]) # invert b/w
                             im = Image.frombytes("1", size, data, decoder_name='raw')
                             return im
+                        im_black, im_red = (get_im(rows) for rows in (self.black_rows, self.red_rows))
                         if not self.two_color_printing:
-                            im_black = get_im(self.black_rows)
                             im = im_black
                         else:
-                            im_black, im_red = (get_im(rows) for rows in (self.black_rows, self.red_rows))
                             im_black = im_black.convert("RGBA")
                             im_red = im_red.convert("L")
                             im_red = colorize(im_red, (255, 0, 0), (255, 255, 255))
