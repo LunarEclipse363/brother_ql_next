@@ -8,36 +8,23 @@ The central piece of code in this module is the class
 """
 
 from builtins import bytes
+from typing import Type
 
 import struct
 import logging
 
 import packbits
 from PIL import Image
-import io
 
-from brother_ql.models import ModelsManager
-from .devicedependent import models, \
-                             min_max_feed, \
-                             min_max_length_dots, \
-                             number_bytes_per_row, \
-                             compressionsupport, \
-                             cuttingsupport, \
-                             expandedmode, \
-                             two_color_support, \
-                             modesetting
+from brother_ql.models import Model, ModelsManager
 
 from . import BrotherQLError, BrotherQLUnsupportedCmd, BrotherQLUnknownModel, BrotherQLRasterError
 
-try:
-    from io import BytesIO
-except: # Py2
-    from cStringIO import StringIO as BytesIO
+from io import BytesIO
 
 logger = logging.getLogger(__name__)
 
 class BrotherQLRaster(object):
-
     """
     This class facilitates the creation of a complete set
     of raster instructions by adding them one after the other
@@ -53,10 +40,15 @@ class BrotherQLRaster(object):
     :ivar bool exception_on_warning: If set to True, an exception is raised if trying to add instruction which are not supported on the selected model. If set to False, the instruction is simply ignored and a warning sent to logging/stderr.
     """
 
+    model: Model
+
     def __init__(self, model='QL-500'):
-        if model not in models:
+        try:
+            self.model = ModelsManager()[model]
+        except KeyError:
             raise BrotherQLUnknownModel()
-        self.model = model
+
+        # TODO: go through everything that references self.model and ensure it uses it as a Model class and not as a string
         self.data = b''
         self._pquality = True
         self.page_number = 0
@@ -66,13 +58,9 @@ class BrotherQLRaster(object):
         self._compression = False
         self.exception_on_warning = False
 
-        self.num_invalidate_bytes = 200
-        for m in ModelsManager().iter_elements():
-            if self.model == m.identifier:
-                self.num_invalidate_bytes = m.num_invalidate_bytes
-                break
+        self.num_invalidate_bytes = self.model.num_invalidate_bytes
 
-    def _warn(self, problem, kind=BrotherQLRasterError):
+    def _warn(self, problem, kind: Type[BrotherQLError] = BrotherQLRasterError):
         """
         Logs the warning message `problem` or raises a
         `BrotherQLRasterError` exception (changeable via `kind`)
@@ -98,7 +86,7 @@ class BrotherQLRaster(object):
 
     @property
     def two_color_support(self):
-        return self.model in two_color_support
+        return self.model.two_color
 
     def add_initialize(self):
         self.page_number = 0
@@ -114,7 +102,7 @@ class BrotherQLRaster(object):
         Switch to the raster mode on the printers that support
         the mode change (others are in raster mode already).
         """
-        if self.model not in modesetting:
+        if not self.model.mode_setting:
             self._unsupported("Trying to switch the operating mode on a printer that doesn't support the command.")
             return
         self.data += b'\x1B\x69\x61\x01' # ESC i a
@@ -167,21 +155,21 @@ class BrotherQLRaster(object):
         # INFO:  media/quality (1B 69 7A) --> found! (payload: 8E 0A 3E 00 D2 00 00 00 00 00)
 
     def add_autocut(self, autocut = False):
-        if self.model not in cuttingsupport:
+        if not self.model.cutting:
             self._unsupported("Trying to call add_autocut with a printer that doesn't support it")
             return
         self.data += b'\x1B\x69\x4D' # ESC i M
         self.data += bytes([autocut << 6])
 
     def add_cut_every(self, n=1):
-        if self.model not in cuttingsupport:
+        if not self.model.cutting:
             self._unsupported("Trying to call add_cut_every with a printer that doesn't support it")
             return
         self.data += b'\x1B\x69\x41' # ESC i A
         self.data += bytes([n & 0xFF])
 
     def add_expanded_mode(self):
-        if self.model not in expandedmode:
+        if not self.model.expanded_mode:
             self._unsupported("Trying to set expanded mode (dpi/cutting at end) on a printer that doesn't support it")
             return
         if self.two_color_printing and not self.two_color_support:
@@ -207,7 +195,7 @@ class BrotherQLRaster(object):
 
         :param bool compression: Whether compression should be on or off
         """
-        if self.model not in compressionsupport:
+        if not self.model.compression:
             self._unsupported("Trying to set compression on a printer that doesn't support it")
             return
         self._compression = compression
@@ -215,10 +203,7 @@ class BrotherQLRaster(object):
         self.data += bytes([compression << 1])
 
     def get_pixel_width(self):
-        try:
-            nbpr = number_bytes_per_row[self.model]
-        except:
-            nbpr = number_bytes_per_row['default']
+        nbpr = self.model.number_bytes_per_row
         return nbpr*8
 
     def add_raster_data(self, image, second_image=None):

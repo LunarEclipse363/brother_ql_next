@@ -9,14 +9,15 @@ from PIL import Image
 import PIL.ImageOps, PIL.ImageChops
 
 from brother_ql.raster import BrotherQLRaster
-from brother_ql.devicedependent import label_type_specs, ENDLESS_LABEL, DIE_CUT_LABEL, ROUND_DIE_CUT_LABEL, right_margin_addition
+from brother_ql.labels import LabelsManager, FormFactor
+from brother_ql.models import ModelsManager
 from brother_ql import BrotherQLUnsupportedCmd
 
 logger = logging.getLogger(__name__)
 
 logging.getLogger("PIL.PngImagePlugin").setLevel(logging.WARNING)
 
-def convert(qlr, images, label,  **kwargs):
+def convert(qlr: BrotherQLRaster, images: list[str | Image.Image], label: str,  **kwargs):
     r"""Converts one or more images to a raster instruction file.
 
     :param qlr:
@@ -42,11 +43,11 @@ def convert(qlr, images, label,  **kwargs):
         * **hq**
         * **threshold**
     """
-    label_specs = label_type_specs[label]
+    label_specs = LabelsManager()[label]
 
-    dots_printable = label_specs['dots_printable']
-    right_margin_dots = label_specs['right_margin_dots']
-    right_margin_dots += right_margin_addition.get(qlr.model, 0)
+    dots_printable = label_specs.dots_printable
+    right_margin_dots = label_specs.offset_r
+    right_margin_dots += qlr.model.additional_offset_r
     device_pixel_width = qlr.get_pixel_width()
 
     cut = kwargs.get('cut', True)
@@ -101,20 +102,20 @@ def convert(qlr, images, label,  **kwargs):
         else:
             dots_expected = dots_printable
 
-        if label_specs['kind'] == ENDLESS_LABEL:
+        if label_specs.form_factor == FormFactor.ENDLESS:
             if rotate not in ('auto', 0):
                 im = im.rotate(rotate, expand=True)
             if dpi_600:
                 im = im.resize((im.size[0]//2, im.size[1]))
             if im.size[0] != dots_printable[0]:
                 hsize = int((dots_printable[0] / im.size[0]) * im.size[1])
-                im = im.resize((dots_printable[0], hsize), Image.ANTIALIAS)
+                im = im.resize((dots_printable[0], hsize), Image.LANCZOS)
                 logger.warning('Need to resize the image...')
             if im.size[0] < device_pixel_width:
                 new_im = Image.new(im.mode, (device_pixel_width, im.size[1]), (255,)*len(im.mode))
                 new_im.paste(im, (device_pixel_width-im.size[0]-right_margin_dots, 0))
                 im = new_im
-        elif label_specs['kind'] in (DIE_CUT_LABEL, ROUND_DIE_CUT_LABEL):
+        elif label_specs.form_factor in (FormFactor.DIE_CUT, FormFactor.ROUND_DIE_CUT):
             if rotate == 'auto':
                 if im.size[0] == dots_expected[1] and im.size[1] == dots_expected[0]:
                     im = im.rotate(90, expand=True)
@@ -155,8 +156,8 @@ def convert(qlr, images, label,  **kwargs):
                 im = im.point(lambda x: 0 if x < threshold else 255, mode="1")
 
         qlr.add_status_information()
-        tape_size = label_specs['tape_size']
-        if label_specs['kind'] in (DIE_CUT_LABEL, ROUND_DIE_CUT_LABEL):
+        tape_size = label_specs.tape_size
+        if label_specs.form_factor in (FormFactor.DIE_CUT, FormFactor.ROUND_DIE_CUT):
             qlr.mtype = 0x0B
             qlr.mwidth = tape_size[0]
             qlr.mlength = tape_size[1]
@@ -179,7 +180,7 @@ def convert(qlr, images, label,  **kwargs):
             qlr.add_expanded_mode()
         except BrotherQLUnsupportedCmd:
             pass
-        qlr.add_margins(label_specs['feed_margin'])
+        qlr.add_margins(label_specs.feed_margin)
         try:
             if compress: qlr.add_compression(True)
         except BrotherQLUnsupportedCmd:

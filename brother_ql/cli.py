@@ -12,7 +12,8 @@ import click
 import jsons
 
 # imports from this very package
-from brother_ql.devicedependent import models, label_sizes, label_type_specs, DIE_CUT_LABEL, ENDLESS_LABEL, ROUND_DIE_CUT_LABEL
+from brother_ql.models import ModelsManager
+from brother_ql.labels import LabelsManager
 from brother_ql.backends import available_backends, backend_factory
 
 
@@ -22,7 +23,7 @@ logger = logging.getLogger('brother_ql')
 printer_help = "The identifier for the printer. This could be a string like tcp://192.168.1.21:9100 for a networked printer or usb://0x04f9:0x2015/000M6Z401370 for a printer connected via USB."
 @click.group()
 @click.option('-b', '--backend', type=click.Choice(available_backends), envvar='BROTHER_QL_BACKEND')
-@click.option('-m', '--model', type=click.Choice(models), envvar='BROTHER_QL_MODEL')
+@click.option('-m', '--model', type=click.Choice(ModelsManager().identifiers()), envvar='BROTHER_QL_MODEL')
 @click.option('-p', '--printer', metavar='PRINTER_IDENTIFIER', envvar='BROTHER_QL_PRINTER', help=printer_help)
 @click.option('--debug', is_flag=True)
 @click.version_option()
@@ -77,7 +78,7 @@ def models_cmd(ctx: click.Context, *args, **kwargs):
         print(jsons.dumps(new_models.ALL_MODELS))
     else:
         print('Supported models:')
-        for model in models: print(" " + model)
+        for model in ModelsManager().identifiers(): print(" " + model)
 
 @info.command()
 @click.option("--json", is_flag=True)
@@ -91,7 +92,7 @@ def labels(ctx: click.Context, *args, **kwargs):
         print(jsons.dumps(new_labels.ALL_LABELS))
     else:
         from brother_ql.output_helpers import textual_label_description
-        print(textual_label_description(label_sizes))
+        print(textual_label_description(LabelsManager().identifiers()))
 
 @info.command()
 @click.pass_context
@@ -187,8 +188,7 @@ def status_cmd(ctx: click.Context, *args, **kwargs):
             logger.error("TIME %.3f - Couldn't understand response: %s", time.time()-start, data)
             continue
         logger.debug('TIME %.3f - result: %s', time.time()-start, result)
-        if result['status_type'] == 'Reply to status request':
-            break
+        break
 
     if result is None:
         logger.error("Received no data.")
@@ -200,15 +200,18 @@ def status_cmd(ctx: click.Context, *args, **kwargs):
             print(f"* Status Type: {result['status_type']}")
             print(f"* Phase Type: {result['phase_type']}")
             print(f"* Model: {result['model_name']}")
-            print(f"* Media Type: {result['media_type']}")
-            print(f"* Media Width: {result['media_width']}")
-            print(f"* Media Length: {result['media_length']}")
+            if result['identified_media'] is not None:
+                print(f"* Identified Media: {result['identified_media'].name} (id: {result['identified_media'].identifier})")
+            else:
+                print(f"* Media Type: {result['media_type']}")
+                print(f"* Media Width: {result['media_width']}")
+                print(f"* Media Length: {result['media_length']}")
             if len(result["errors"]) > 0:
                 print(f"* Errors: {result['media_length']}")
                 for e in result["errors"]:
                     print(f"  + {e}")
         case 'json':
-            print(json.dumps(result))
+            print(jsons.dumps(result))
         case 'raw_bytes':
             sys.stdout.buffer.write(data)
         case 'raw_base64':
@@ -218,7 +221,7 @@ def status_cmd(ctx: click.Context, *args, **kwargs):
 
 @cli.command('print', short_help='Print a label')
 @click.argument('images', nargs=-1, type=click.File('rb'), metavar='IMAGE [IMAGE] ...')
-@click.option('-l', '--label', type=click.Choice(label_sizes), envvar='BROTHER_QL_LABEL', help='The label (size, type - die-cut or endless). Run `brother_ql info labels` for a full list including ideal pixel dimensions.')
+@click.option('-l', '--label', type=click.Choice(LabelsManager().identifiers()), envvar='BROTHER_QL_LABEL', help='The label (size, type - die-cut or endless). Run `brother_ql info labels` for a full list including ideal pixel dimensions.')
 @click.option('-r', '--rotate', type=click.Choice(('auto', '0', '90', '180', '270')), default='auto', help='Rotate the image (counterclock-wise) by this amount of degrees.')
 @click.option('-t', '--threshold', type=float, default=70.0, help='The threshold value (in percent) to discriminate between black and white pixels.')
 @click.option('-d', '--dither', is_flag=True, help='Enable dithering when converting the image to b/w. If set, --threshold is meaningless.')

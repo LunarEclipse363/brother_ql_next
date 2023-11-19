@@ -9,6 +9,7 @@ from PIL import Image
 from PIL.ImageOps import colorize
 
 from builtins import bytes
+from brother_ql.labels import LabelsManager
 
 logger = logging.getLogger(__name__)
 
@@ -221,14 +222,17 @@ def interpret_response(data):
     else:
         logger.error("Unknown phase type %02X", phase_type)
 
+    identified_media = LabelsManager().find_label_by_size(media_width, media_length)
+
     response = {
-      'status_type': status_type,
-      'phase_type': phase_type,
-      'model_name': model_code,
-      'media_type': media_type,
-      'media_width': media_width,
-      'media_length': media_length,
-      'errors': errors,
+        'status_type': status_type,
+        'phase_type': phase_type,
+        'model_name': model_code,
+        'media_type': media_type,
+        'media_width': media_width,
+        'media_length': media_length,
+        'identified_media': identified_media,
+        'errors': errors,
     }
     return response
 

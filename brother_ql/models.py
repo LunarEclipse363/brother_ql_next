@@ -64,5 +64,5 @@ ALL_MODELS = [
 ]
 
 class ModelsManager(ElementsManager):
-    DEFAULT_ELEMENTS = copy.copy(ALL_MODELS)
-    ELEMENTS_NAME = 'model'
+    elements = copy.copy(ALL_MODELS)
+    element_name = 'model'

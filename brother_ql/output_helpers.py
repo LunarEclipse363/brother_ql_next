@@ -1,7 +1,6 @@
 import logging
 
-from brother_ql.devicedependent import label_type_specs
-from brother_ql.devicedependent import DIE_CUT_LABEL, ENDLESS_LABEL, ROUND_DIE_CUT_LABEL
+from brother_ql.labels import FormFactor, LabelsManager
 
 logger = logging.getLogger(__name__)
 
@@ -12,15 +11,15 @@ def textual_label_description(labels_to_include):
     output += fmt.format(label_size="Name", dots_printable="Printable px", label_descr="Description")
     #output += fmt.format(label_size="", dots_printable="width x height", label_descr="")
     for label_size in labels_to_include:
-        s = label_type_specs[label_size]
-        if s['kind'] in (DIE_CUT_LABEL, ROUND_DIE_CUT_LABEL):
+        label = LabelsManager()[label_size]
+        if label.form_factor in (FormFactor.DIE_CUT, FormFactor.ROUND_DIE_CUT):
             dp_fmt = "{0:4d} x {1:4d}"
-        elif s['kind'] == ENDLESS_LABEL:
+        elif label.form_factor == FormFactor.ENDLESS:
             dp_fmt = "{0:4d}"
         else:
             dp_fmt = " - unknown - "
-        dots_printable = dp_fmt.format(*s['dots_printable'])
-        label_descr = s['name']
+        dots_printable = dp_fmt.format(*label.dots_printable)
+        label_descr = label.name
         output += fmt.format(label_size=label_size, dots_printable=dots_printable, label_descr=label_descr)
     return output
 

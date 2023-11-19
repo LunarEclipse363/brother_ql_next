@@ -5,6 +5,7 @@ from enum import IntEnum
 import copy
 
 from brother_ql.helpers import ElementsManager
+from brother_ql.models import ModelsManager
 
 class FormFactor(IntEnum):
     """
@@ -57,12 +58,11 @@ class Label(object):
     #: Some labels allow printing in red, most don't.
     color: Color = attrib(default=Color.BLACK_WHITE)
 
-    def works_with_model(self, model) -> bool:
+    def works_with_model(self, model: str) -> bool:
         """
         Method to determine if certain label can be printed by the specified printer model.
         """
-        # TODO: figure out why does this depend on an external `models` variable
-        if self.restricted_to_models and model not in models: return False
+        if self.restricted_to_models and model not in ModelsManager().identifiers(): return False
         else: return True
 
     @property
@@ -114,5 +114,14 @@ ALL_LABELS = (
 )
 
 class LabelsManager(ElementsManager):
-    DEFAULT_ELEMENTS = copy.copy(ALL_LABELS)
-    ELEMENT_NAME = "label"
+    elements = copy.copy(ALL_LABELS)
+    element_name = "label"
+
+    def find_label_by_size(self, width: int, height: int):
+        """
+        Finds a label that matches the given dimensions
+
+        Note: this will find the first matching label.
+        This means it cannot autodetect 62red for the QL-8xx printers.
+        """
+        return next(filter(lambda l : l.tape_size == (width, height), self.elements), None)
