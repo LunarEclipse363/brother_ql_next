@@ -25,7 +25,7 @@ def discover(backend_identifier='linux_kernel'):
 
 def send(instructions, printer_identifier=None, backend_identifier=None, blocking=True):
     """
-    Send instruction bytes to a printer.
+    Send instruction bytes to a printer. Geared towards printing.
 
     :param bytes instructions: The instructions to be sent to the printer.
     :param str printer_identifier: Identifier for the printer.
@@ -101,3 +101,65 @@ def send(instructions, printer_identifier=None, backend_identifier=None, blockin
         logger.info("Printing was successful. Waiting for the next job.")
 
     return status
+
+def status(printer_model=None, printer_identifier=None, backend_identifier=None):
+    """
+    Requests status information from the printer.
+
+    Returns a tuple of (status, raw) where status is a parsed dict with the status info and raw are the raw bytes.
+    """
+    from brother_ql.backends import backend_factory, guess_backend
+    from brother_ql.reader import interpret_response
+    from brother_ql.raster import BrotherQLRaster
+    from brother_ql.exceptions import BrotherQLError
+    import time
+
+    # QL-800 because it has the largest number of required invalidate bytes
+    if printer_model is None:
+        printer_model = "QL-800"
+
+    if backend_identifier is None:
+        try:
+            backend_identifier = guess_backend(printer_identifier)
+        except:
+            logger.info("No backend stated. Selecting the default linux_kernel backend.")
+            backend_identifier = 'linux_kernel'
+    if backend_identifier == 'network':
+        # You can get status info via SNMP but this is unimplemnted
+        logger.error("The network backend currently doesn't support the status command.")
+        raise NotImplemented() # TODO: add more specific exceptions
+
+    be = backend_factory(backend_identifier)
+    list_available_devices = be['list_available_devices'] # This can be used for autodetecting printers
+    BrotherQLBackend       = be['backend_class']
+    printer = BrotherQLBackend(printer_identifier)
+
+    raster = BrotherQLRaster(printer_model)
+    raster.add_invalidate()
+    raster.add_status_information()
+    instructions = raster.data
+
+    start = time.time()
+    logger.info('Sending instructions to the printer. Total: %d bytes.', len(instructions))
+    printer.write(instructions)
+
+    result = None
+    data = b""
+    while time.time() - start < 10:
+        data = printer.read()
+        if not data:
+            time.sleep(0.005)
+            continue
+        try:
+            result = interpret_response(data)
+        except ValueError:
+            logger.error("TIME %.3f - Couldn't understand response: %s", time.time()-start, data)
+            continue
+        logger.debug('TIME %.3f - result: %s', time.time()-start, result)
+        break
+
+    if result is None:
+        logger.error("Received no data.")
+        raise BrotherQLError("Received no data.")
+
+    return (result, data)

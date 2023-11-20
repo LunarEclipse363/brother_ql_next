@@ -141,83 +141,33 @@ def env(ctx: click.Context, *args, **kwargs):
 @click.option('-f', '--format', type=click.Choice(('default', 'json', 'raw_bytes', 'raw_base64', 'raw_hex')), default='default', help='Output Format.')
 @click.pass_context
 def status_cmd(ctx: click.Context, *args, **kwargs):
-    from brother_ql.backends import backend_factory, guess_backend
-    from brother_ql.reader import interpret_response
-    from brother_ql.raster import BrotherQLRaster
-    import time
-
-    # QL-800 because it has the largest number of required invalidate bytes
-    printer_model = ctx.meta.get('MODEL', "QL-800")
-    printer_identifier=ctx.meta.get('PRINTER')
-    backend_identifier=ctx.meta.get('BACKEND')
-    if backend_identifier is None:
-        try:
-            backend_identifier = guess_backend(printer_identifier)
-        except:
-            logger.info("No backend stated. Selecting the default linux_kernel backend.")
-            backend_identifier = 'linux_kernel'
-    if backend_identifier == 'network':
-        # TODO: technically you can get status info via SNMP but this is unimplemnted
-        logger.error("The network backend currently doesn't support the status command.")
-        return -1
-
-    be = backend_factory(backend_identifier)
-    list_available_devices = be['list_available_devices'] # This can be used for autodetecting printers
-    BrotherQLBackend       = be['backend_class']
-    printer = BrotherQLBackend(printer_identifier)
-
-    raster = BrotherQLRaster(printer_model)
-    raster.add_invalidate()
-    raster.add_status_information()
-    instructions = raster.data
-
-    start = time.time()
-    logger.info('Sending instructions to the printer. Total: %d bytes.', len(instructions))
-    printer.write(instructions)
-
-    result = None
-    data = b""
-    while time.time() - start < 10:
-        data = printer.read()
-        if not data:
-            time.sleep(0.005)
-            continue
-        try:
-            result = interpret_response(data)
-        except ValueError:
-            logger.error("TIME %.3f - Couldn't understand response: %s", time.time()-start, data)
-            continue
-        logger.debug('TIME %.3f - result: %s', time.time()-start, result)
-        break
-
-    if result is None:
-        logger.error("Received no data.")
-        return -1
+    from brother_ql.backends.helpers import status
+    status, raw = status(printer_model=ctx.meta.get('MODEL'), printer_identifier=ctx.meta.get('PRINTER'), backend_identifier=ctx.meta.get('BACKEND'))
 
     match kwargs['format']:
         case 'default':
             print("Printer Status:")
-            print(f"* Status Type: {result['status_type']}")
-            print(f"* Phase Type: {result['phase_type']}")
-            print(f"* Model: {result['model_name']}")
-            if result['identified_media'] is not None:
-                print(f"* Identified Media: {result['identified_media'].name} (id: {result['identified_media'].identifier})")
+            print(f"* Status Type: {status['status_type']}")
+            print(f"* Phase Type: {status['phase_type']}")
+            print(f"* Model: {status['model_name']}")
+            if status['identified_media'] is not None:
+                print(f"* Identified Media: {status['identified_media'].name} (id: {status['identified_media'].identifier})")
             else:
-                print(f"* Media Type: {result['media_type']}")
-                print(f"* Media Width: {result['media_width']}")
-                print(f"* Media Length: {result['media_length']}")
-            if len(result["errors"]) > 0:
-                print(f"* Errors: {result['media_length']}")
-                for e in result["errors"]:
+                print(f"* Media Type: {status['media_type']}")
+                print(f"* Media Width: {status['media_width']}")
+                print(f"* Media Length: {status['media_length']}")
+            if len(status["errors"]) > 0:
+                print(f"* Errors: {status['media_length']}")
+                for e in status["errors"]:
                     print(f"  + {e}")
         case 'json':
-            print(jsons.dumps(result))
+            print(jsons.dumps(status))
         case 'raw_bytes':
-            sys.stdout.buffer.write(data)
+            sys.stdout.buffer.write(raw)
         case 'raw_base64':
-            sys.stdout.buffer.write(base64.encodebytes(data))
+            sys.stdout.buffer.write(base64.encodebytes(raw))
         case 'raw_hex':
-            print(data.hex())
+            print(raw.hex())
 
 @cli.command('print', short_help='Print a label')
 @click.argument('images', nargs=-1, type=click.File('rb'), metavar='IMAGE [IMAGE] ...')
