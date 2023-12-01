@@ -3,7 +3,6 @@
 # Python standard library
 from __future__ import print_function
 import logging
-import json
 import base64
 import sys
 

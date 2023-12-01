@@ -219,6 +219,12 @@ class BrotherQLRaster(object):
         if image.size[0] != self.get_pixel_width():
             fmt = 'Wrong pixel width: {}, expected {}'
             raise BrotherQLRasterError(fmt.format(image.size[0], self.get_pixel_width()))
+
+        height_range = self.model.min_max_length_dots
+        if not (height_range[0] <= image.size[1] <= height_range[1]):
+            fmt = "Invalid raster height: {}, expected between {} and {} dots for the {} printer"
+            raise BrotherQLRasterError(fmt.format(image.size[1], *height_range, self.model.name))
+
         images = [image]
         if second_image:
             if image.size != second_image.size:

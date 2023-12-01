@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - The backend and other global options are now properly set to their default values
+- The driver now ensures the minimum and maximum label lengths for every printer are respected
 
 ### Removed
 - Deprecation Warning
