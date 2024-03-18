@@ -220,5 +220,66 @@ def send_cmd(ctx: click.Context, *args, **kwargs):
     from brother_ql.backends.helpers import send
     send(instructions=kwargs['instructions'].read(), printer_identifier=ctx.meta.get('PRINTER'), backend_identifier=ctx.meta.get('BACKEND'), blocking=True)
 
+@cli.command(name='transpile', short_help="modify a raster file for maximum compatibility")
+@click.argument('input_model', type=click.Choice([m.identifier for m in ModelsManager.elements])) #help="model the input file was created for")
+@click.argument('input', type=click.File('rb')) #help="input raster file")
+@click.argument('output', type=click.File('wb')) #help="output raster file")
+#@click.option('-m', '--mode', type=click.Choice(('simplify', 'reserved')), default='simplify', help='set mode of operation')
+@click.pass_context
+def transpile_cmd(ctx: click.Context, *args, **kwargs):
+    import brother_ql.reader as reader
+
+    # FIXME: this should support all the models the driver supports
+    #  TODO: do a map to figure out what to downgrade to
+    #  TODO: find a way to figure out what commands to drop automatically
+    if kwargs['input_model'] not in ("QL-580N", "QL-570"):
+        logging.error("Model currently not supported")
+        return 1
+
+    data = kwargs['input'].read()
+    processed = bytes()
+    is_compressed = False
+
+    for instruction in reader.chunker(data):
+        for opcode in reader.OPCODES.keys():
+            if not instruction.startswith(opcode):
+                continue
+
+            match reader.OPCODES[opcode][0]:
+                case "mode setting":
+                    pass
+                case "compression":
+                    # This doesn't get added to the output
+                    is_compressed = True
+                case "raster":
+                    rpl = bytes(instruction[3:]) # raster payload
+                    if is_compressed:
+                        row = bytes()
+                        index = 0
+                        while True:
+                            num = rpl[index]
+                            if num & 0x80:
+                                num = num - 0x100
+                            if num < 0:
+                                num = -num + 1
+                                row += bytes([rpl[index+1]] * num)
+                                index += 2
+                            else:
+                                num = num + 1
+                                row += rpl[index+1:index+1+num]
+                                index += 1 + num
+                            if index >= len(rpl): break
+                    else:
+                        row = rpl
+                    processed += instruction[:2]
+                    assert len(row) == 90 or len(row) == 162 # sanity check
+                    processed += len(row).to_bytes(length=1, byteorder='big')
+                    processed += row
+                case _:
+                    processed += instruction
+            break
+
+    kwargs['output'].write(processed)
+
 if __name__ == '__main__':
     cli()
