@@ -1,22 +1,4 @@
-## Fork Notice
-The status of the upstream project [is currently unknown](https://github.com/pklaus/brother_ql/issues/135),
-it doesn't seem to be active anymore, thus I have decided to fork it and improve upon it.
-
-### Goals
-- Adding new features
-- Improving the API and cleaning up the code
-- Creating API documentation
-- Removing legacy code
-- I will not add support for PT-series printers,
-  because for them every printer needs a completely separate definition of labels,
-  while for QL-series printers, all the label-specific offsets and such stay the same across models,
-  thus, the data model used in this package just doesn't fit PT-series printers.
-
-### Notable Changes
-See [the CHANGELOG file](./CHANGELOG.md)
-
-
-## brother\_ql
+## brother\_ql\_next
 
 A Python package to control Brother QL label printers.
 It implements the raster language of those printers and allows you to send instruction files to your printer.
@@ -56,11 +38,14 @@ If you want to print with high precision (which is important for barcodes for ex
 you rather want to have control about every single pixel to be printed.
 This is where brother\_ql comes into the game.
 
+## Changelog
+For notable changes between releases, see [the CHANGELOG file](CHANGELOG.md)
+
 ## Installation
 
 To install the latest release:
 
-    pip install --upgrade https://github.com/LunarEclipse363/brother_ql/archive/refs/tags/v0.11.0.zip
+    pip install --upgrade brother_ql_next
 
 The upgrade flag makes sure, you get the latest version of brother\_ql but also
 of its dependencies.
@@ -251,9 +236,6 @@ Thanks to everyone helping to improve brother\_ql.
 
 ## Links
 
-* The source code and issue tracker of this package is to be found on **Github**: [lunareclipse363/brother\_ql][].
+* The source code and issue tracker of this package is to be found on **Github**: [Lunareclipse363/brother\_ql](https://github.com/LunarEclipse363/brother_ql).
 * There is no pypi release yet.
-* A curated list of related and unrelated software can be found [in this document][related-unrelated].
-
-[lunareclipse363/brother\_ql]: https://github.com/LunarEclipse363/brother_ql
-[related-unrelated]: https://gist.github.com/pklaus/aeb55e18d36690df6a84a3eab49e9fd7
+* Original version of `brother_ql`: [pklaus/brother\_ql](https://github.com/pklaus/brother_ql/)

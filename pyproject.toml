@@ -1,6 +1,6 @@
 [project]
-name = "brother_ql"
-version = "0.11.0"
+name = "brother_ql_next"
+version = "0.11.1"
 description = "Python package to talk to Brother QL label printers"
 readme = "README.md"
 authors = [
@@ -25,6 +25,8 @@ dependencies = [
 ]
 keywords = [
     "Brother",
+    "Label",
+    "Printer",
     "QL-500",
     "QL-550",
     "QL-560",
