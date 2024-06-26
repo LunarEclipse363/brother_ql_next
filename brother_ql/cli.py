@@ -140,8 +140,11 @@ def env(ctx: click.Context, *args, **kwargs):
 @click.option('-f', '--format', type=click.Choice(('default', 'json', 'raw_bytes', 'raw_base64', 'raw_hex')), default='default', help='Output Format.')
 @click.pass_context
 def status_cmd(ctx: click.Context, *args, **kwargs):
-    from brother_ql.backends.helpers import status
-    status, raw = status(printer_model=ctx.meta.get('MODEL'), printer_identifier=ctx.meta.get('PRINTER'), backend_identifier=ctx.meta.get('BACKEND'))
+    from brother_ql.backends.helpers import status as status_fn
+    try:
+        status, raw = status_fn(printer_model=ctx.meta.get('MODEL'), printer_identifier=ctx.meta.get('PRINTER'), backend_identifier=ctx.meta.get('BACKEND'))
+    except NotImplementedError as _:
+        quit(1)
 
     match kwargs['format']:
         case 'default':

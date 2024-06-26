@@ -125,9 +125,9 @@ def status(printer_model=None, printer_identifier=None, backend_identifier=None)
             logger.info("No backend stated. Selecting the default linux_kernel backend.")
             backend_identifier = 'linux_kernel'
     if backend_identifier == 'network':
-        # You can get status info via SNMP but this is unimplemnted
+        # You can get status info via SNMP but this is unimplemented
         logger.error("The network backend currently doesn't support the status command.")
-        raise NotImplemented() # TODO: add more specific exceptions
+        raise NotImplementedError() # TODO: add more specific exceptions
 
     be = backend_factory(backend_identifier)
     list_available_devices = be['list_available_devices'] # This can be used for autodetecting printers
