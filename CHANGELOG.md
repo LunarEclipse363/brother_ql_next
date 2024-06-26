@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.11.1] - 2024-06-26
 ### Added
 - Changed package name to `brother_ql_next` for PyPi release
+- Support for Python 3.9+ (previously 3.10+)
 
 ## [0.11.0] - 2024-06-26
 

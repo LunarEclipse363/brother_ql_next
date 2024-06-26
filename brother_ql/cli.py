@@ -146,30 +146,30 @@ def status_cmd(ctx: click.Context, *args, **kwargs):
     except NotImplementedError as _:
         quit(1)
 
-    match kwargs['format']:
-        case 'default':
-            print("Printer Status:")
-            print(f"* Status Type: {status['status_type']}")
-            print(f"* Phase Type: {status['phase_type']}")
-            print(f"* Model: {status['model_name']}")
-            if status['identified_media'] is not None:
-                print(f"* Identified Media: {status['identified_media'].name} (id: {status['identified_media'].identifier})")
-            else:
-                print(f"* Media Type: {status['media_type']}")
-                print(f"* Media Width: {status['media_width']}")
-                print(f"* Media Length: {status['media_length']}")
-            if len(status["errors"]) > 0:
-                print(f"* Errors: {status['media_length']}")
-                for e in status["errors"]:
-                    print(f"  + {e}")
-        case 'json':
-            print(jsons.dumps(status))
-        case 'raw_bytes':
-            sys.stdout.buffer.write(raw)
-        case 'raw_base64':
-            sys.stdout.buffer.write(base64.encodebytes(raw))
-        case 'raw_hex':
-            print(raw.hex())
+    # This should be a match, however, Python 3.9 support
+    if kwargs["format"] == 'default':
+        print("Printer Status:")
+        print(f"* Status Type: {status['status_type']}")
+        print(f"* Phase Type: {status['phase_type']}")
+        print(f"* Model: {status['model_name']}")
+        if status['identified_media'] is not None:
+            print(f"* Identified Media: {status['identified_media'].name} (id: {status['identified_media'].identifier})")
+        else:
+            print(f"* Media Type: {status['media_type']}")
+            print(f"* Media Width: {status['media_width']}")
+            print(f"* Media Length: {status['media_length']}")
+        if len(status["errors"]) > 0:
+            print(f"* Errors: {status['media_length']}")
+            for e in status["errors"]:
+                print(f"  + {e}")
+    elif kwargs["format"] == 'json':
+        print(jsons.dumps(status))
+    elif kwargs["format"] == 'raw_bytes':
+        sys.stdout.buffer.write(raw)
+    elif kwargs["format"] == 'raw_base64':
+        sys.stdout.buffer.write(base64.encodebytes(raw))
+    elif kwargs["format"] == 'raw_hex':
+        print(raw.hex())
 
 @cli.command('print', short_help='print a label')
 @click.argument('images', nargs=-1, type=click.File('rb'), metavar='IMAGE [IMAGE] ...')

@@ -54,7 +54,7 @@ Alternatively, you can install the latest version from Github using:
 
     pip install --upgrade https://github.com/LunarEclipse363/brother_ql/archive/master.zip
 
-This package will support Python 3.10+
+This package will support Python 3.9+
 
 In order to run the `brother_ql` command line utility, the directory it resides in
 needs to be in the PATH envirnoment variable.

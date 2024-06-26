@@ -11,7 +11,7 @@ maintainers = [
     { name = "LunarEclipse", email = "luna@lunareclipse.zone" },
 ]
 license = { text = "GPL-3.0-only" }
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = [
     "click",
     "future",
