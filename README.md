@@ -236,6 +236,6 @@ Thanks to everyone helping to improve brother\_ql.
 
 ## Links
 
-* The source code and issue tracker of this package is to be found on **Github**: [Lunareclipse363/brother\_ql](https://github.com/LunarEclipse363/brother_ql).
-* There is no pypi release yet.
-* Original version of `brother_ql`: [pklaus/brother\_ql](https://github.com/pklaus/brother_ql/)
+* The source code and issue tracker of this package is to be found on **Github**: [LunarEclipse363/brother\_ql](https://github.com/LunarEclipse363/brother_ql).
+* The **PyPi** release is avaiable at: [https://pypi.org/project/brother-ql-next/](https://pypi.org/project/brother-ql-next/)
+* Original unmaintained version of `brother_ql`: [pklaus/brother\_ql](https://github.com/pklaus/brother_ql/)
