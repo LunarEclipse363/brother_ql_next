@@ -60,7 +60,7 @@ This is where brother\_ql comes into the game.
 
 To install the latest release:
 
-    pip install --upgrade https://github.com/LunarEclipse363/brother_ql/archive/refs/tags/v0.10.0.zip
+    pip install --upgrade https://github.com/LunarEclipse363/brother_ql/archive/refs/tags/v0.11.0.zip
 
 The upgrade flag makes sure, you get the latest version of brother\_ql but also
 of its dependencies.

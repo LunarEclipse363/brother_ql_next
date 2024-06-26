@@ -1,6 +1,6 @@
 [project]
 name = "brother_ql"
-version = "0.10.0-alpha"
+version = "0.11.0"
 description = "Python package to talk to Brother QL label printers"
 readme = "README.md"
 authors = [

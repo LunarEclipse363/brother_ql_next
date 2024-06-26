@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.11.0] - 2024-06-26
 
 ### Added
 - A `status` subcommand to query the printer status
@@ -14,9 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - The backend and other global options are now properly set to their default values
 - The driver now ensures the minimum and maximum label lengths for every printer are respected
+- Commands now use the new API and no longer show a deprecation warning for the devicedependent module
 
 ### Removed
-- Deprecation Warning
+- `devicedependent` module
 
 ## [0.10.0] - 2023-11-12
 
