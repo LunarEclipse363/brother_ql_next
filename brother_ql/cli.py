@@ -136,7 +136,7 @@ def env(ctx: click.Context, *args, **kwargs):
         print(fmt.format(req=proj, spec=spec, ins_vers=req_pkg.version))
     print("\n##################\n")
 
-@cli.command('status', short_help='Request status information from the printer.')
+@cli.command('status', short_help='request status information from the printer')
 @click.option('-f', '--format', type=click.Choice(('default', 'json', 'raw_bytes', 'raw_base64', 'raw_hex')), default='default', help='Output Format.')
 @click.pass_context
 def status_cmd(ctx: click.Context, *args, **kwargs):
@@ -171,7 +171,7 @@ def status_cmd(ctx: click.Context, *args, **kwargs):
         case 'raw_hex':
             print(raw.hex())
 
-@cli.command('print', short_help='Print a label')
+@cli.command('print', short_help='print a label')
 @click.argument('images', nargs=-1, type=click.File('rb'), metavar='IMAGE [IMAGE] ...')
 @click.option('-l', '--label', type=click.Choice(LabelsManager().identifiers()), envvar='BROTHER_QL_LABEL', help='The label (size, type - die-cut or endless). Run `brother_ql info labels` for a full list including ideal pixel dimensions.')
 @click.option('-r', '--rotate', type=click.Choice(('auto', '0', '90', '180', '270')), default='auto', help='Rotate the image (counterclock-wise) by this amount of degrees.')

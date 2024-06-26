@@ -81,29 +81,32 @@ On those systems, extending the path variable via `export PATH="${PATH}:~/.local
 
 The main user interface of this package is the command line tool `brother_ql`.
 
-    Usage: brother_ql [OPTIONS] COMMAND [ARGS]...
-    
-      Command line interface for the brother_ql Python package.
-    
-    Options:
-      -b, --backend [pyusb|network|linux_kernel]
-      -m, --model [QL-500|QL-550|QL-560|QL-570|QL-580N|QL-650TD|QL-700|QL-710W|QL-720NW|QL-800|QL-810W|QL-820NWB|QL-1050|QL-1060N]
-      -p, --printer PRINTER_IDENTIFIER
-                                      The identifier for the printer. This could
-                                      be a string like tcp://192.168.1.21:9100 for
-                                      a networked printer or
-                                      usb://0x04f9:0x2015/000M6Z401370 for a
-                                      printer connected via USB.
-      --debug
-      --version                       Show the version and exit.
-      --help                          Show this message and exit.
-    
-    Commands:
-      analyze   interpret a binary file containing raster...
-      discover  find connected label printers
-      info      list available labels, models etc.
-      print     Print a label
-      send      send an instruction file to the printer
+```
+Usage: brother_ql [OPTIONS] COMMAND [ARGS]...
+
+  Command line interface for the brother_ql Python package.
+
+Options:
+  -b, --backend [pyusb|network|linux_kernel]
+  -m, --model [QL-500|QL-550|QL-560|QL-570|QL-580N|QL-600|QL-650TD|QL-700|QL-710W|QL-720NW|QL-800|QL-810W|QL-820NWB|QL-1050|QL-1060N|QL-1100|QL-1100NWB|QL-1115NWB]
+  -p, --printer PRINTER_IDENTIFIER
+                                  The identifier for the printer. This could
+                                  be a string like tcp://192.168.1.21:9100 for
+                                  a networked printer or
+                                  usb://0x04f9:0x2015/000M6Z401370 for a
+                                  printer connected via USB.
+  --debug
+  --version                       Show the version and exit.
+  --help                          Show this message and exit.
+
+Commands:
+  analyze   interpret a binary file containing raster instructions for...
+  discover  find connected label printers
+  info      list available labels, models etc.
+  print     print a label
+  send      send an instruction file to the printer
+  status    request status information from the printer
+```
 
 There are some global options available such as --model and --printer.
 They can also be provided by environment variables (`BROTHER_QL_MODEL` and `BROTHER_QL_PRINTER`).
