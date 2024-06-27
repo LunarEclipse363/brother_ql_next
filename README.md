@@ -179,11 +179,11 @@ it will be scaled to fit the width.
 
 There are multiple backends for connecting to the printer available (✔: supported, ✘: not supported):
 
-Backend | Kind | Linux | Mac OS | Windows
--------|-------|---------|---------|--------
-network (1) | TCP | ✔ | ✔ | ✔
-linux\_kernel | USB | ✔ (2) | ✘ | ✘
-pyusb (3) | USB | ✔ (3.1) | ✔ (3.2) | ✔ (3.3)
+ Backend      | Kind | Linux   | Mac OS  | Windows
+--------------|------|---------|---------|--------
+network (1)   | TCP  | ✔       | ✔       | ✔
+linux\_kernel | USB  | ✔ (2)   | ✘       | ✘
+pyusb (3)     | USB  | ✔ (3.1) | ✔ (3.2) | ✔ (3.3)
 
 Notes:
 
@@ -236,6 +236,6 @@ Thanks to everyone helping to improve brother\_ql.
 
 ## Links
 
-* The source code and issue tracker of this package is to be found on **Github**: [LunarEclipse363/brother\_ql](https://github.com/LunarEclipse363/brother_ql_next).
+* The source code and issue tracker of this package is to be found on **Github**: [LunarEclipse363/brother\_ql\_next](https://github.com/LunarEclipse363/brother_ql_next).
 * The **PyPi** release is avaiable at: [https://pypi.org/project/brother-ql-next/](https://pypi.org/project/brother-ql-next/)
 * Original unmaintained version of `brother_ql`: [pklaus/brother\_ql](https://github.com/pklaus/brother_ql/)
