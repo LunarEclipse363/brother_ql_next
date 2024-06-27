@@ -63,4 +63,5 @@ brother_ql_debug = "brother_ql.brother_ql_debug:main"
 brother_ql_info = "brother_ql.brother_ql_info:main"
 
 [project.urls]
-repository = "https://github.com/LunarEclipse363/brother_ql"
+repository = "https://github.com/LunarEclipse363/brother_ql_next"
+changelog = "https://github.com/LunarEclipse363/brother_ql_next/blob/main/CHANGELOG.md"

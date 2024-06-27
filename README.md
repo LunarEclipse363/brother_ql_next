@@ -52,7 +52,7 @@ of its dependencies.
 
 Alternatively, you can install the latest version from Github using:
 
-    pip install --upgrade https://github.com/LunarEclipse363/brother_ql/archive/master.zip
+    pip install --upgrade https://github.com/LunarEclipse363/brother_ql_next/archive/main.zip
 
 This package will support Python 3.9+
 
@@ -236,6 +236,6 @@ Thanks to everyone helping to improve brother\_ql.
 
 ## Links
 
-* The source code and issue tracker of this package is to be found on **Github**: [LunarEclipse363/brother\_ql](https://github.com/LunarEclipse363/brother_ql).
+* The source code and issue tracker of this package is to be found on **Github**: [LunarEclipse363/brother\_ql](https://github.com/LunarEclipse363/brother_ql_next).
 * The **PyPi** release is avaiable at: [https://pypi.org/project/brother-ql-next/](https://pypi.org/project/brother-ql-next/)
 * Original unmaintained version of `brother_ql`: [pklaus/brother\_ql](https://github.com/pklaus/brother_ql/)
