@@ -1,5 +1,9 @@
 ## brother\_ql\_next
 
+> **Note:**
+> This version is incompatible with `brother_ql`, you must uninstall it *before* installing `brother_ql_next`  
+> The *package* name is still `brother_ql` despite the new *distribution* name.
+
 A Python package to control Brother QL label printers.
 It implements the raster language of those printers and allows you to send instruction files to your printer.
 In more details, the following is possible with this package:
