@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import struct
 import io
 import logging
-import sys
+import struct
+from typing import Any
 
 from PIL import Image
 from PIL.ImageOps import colorize
@@ -128,13 +128,13 @@ RESP_BYTE_NAMES = [
   'Reserved',
 ]
 
-def hex_format(data):
-    try: # Py3
-        return ' '.join('{:02X}'.format(byte) for byte in data)
-    except ValueError: # Py2
-        return ' '.join('{:02X}'.format(ord(byte)) for byte in data)
+def hex_format(data: bytes):
+    """
+    Prints the hexadecimal representation of some bytes
+    """
+    return ' '.join('{:02X}'.format(byte) for byte in data)
 
-def chunker(data, raise_exception=False):
+def chunker(data: bytes, raise_exception=False):
     """
     Breaks data stream (bytes) into a list of bytes objects containing single instructions each.
 
@@ -166,12 +166,18 @@ def chunker(data, raise_exception=False):
         data = data[num_bytes:]
     return instructions
 
-def match_opcode(data):
+def match_opcode(data: bytes):
+    """
+    Finds the opcode matching the given instruction
+    """
     matching_opcodes = [opcode for opcode in OPCODES.keys() if data.startswith(opcode)]
     assert len(matching_opcodes) == 1
     return matching_opcodes[0]
 
-def interpret_response(data):
+def interpret_response(data: bytes) -> dict[str, Any]:
+    """
+    Interprets a raw response received from the printer
+    """
     data = bytes(data)
     if len(data) < 32:
         raise NameError('Insufficient amount of data received', hex_format(data))
@@ -224,6 +230,7 @@ def interpret_response(data):
 
     identified_media = LabelsManager().find_label_by_size(media_width, media_length)
 
+    # TODO: make a real class for this
     response = {
         'status_type': status_type,
         'phase_type': phase_type,
@@ -247,7 +254,7 @@ def merge_specific_instructions(chunks, join_preamble=True, join_raster=True):
     instruction_buffer = b''
     for instruction in chunks:
         opcode = match_opcode(instruction)
-        if   join_preamble and OPCODES[opcode][0] == 'preamble' and last_opcode == 'preamble':
+        if join_preamble and OPCODES[opcode][0] == 'preamble' and last_opcode == 'preamble':
             instruction_buffer += instruction
         elif join_raster and 'raster' in OPCODES[opcode][0] and 'raster' in last_opcode:
             instruction_buffer += instruction
@@ -261,12 +268,15 @@ def merge_specific_instructions(chunks, join_preamble=True, join_raster=True):
     return new_instructions
 
 class BrotherQLReader(object):
+    """
+    Class for decoding raw printer instruction rasters
+    """
     DEFAULT_FILENAME_FMT = 'label{counter:04d}.png'
 
-    def __init__(self, brother_file):
-        if type(brother_file) in (str,):
+    def __init__(self, brother_file: str | io.BufferedReader):
+        if type(brother_file) is str:
             brother_file = io.open(brother_file, 'rb')
-        self.brother_file = brother_file
+        self.brother_file: io.BufferedReader = brother_file # type: ignore
         self.mwidth, self.mheight = None, None
         self.raster_no = None
         self.black_rows = []
@@ -279,6 +289,10 @@ class BrotherQLReader(object):
         self.filename_fmt = self.DEFAULT_FILENAME_FMT
 
     def analyse(self):
+        """
+        Analyzes the instruction file and prints the results,
+        decoding rasters and saving them as images in the current working directory.
+        """
         instructions = self.brother_file.read()
         for instruction in chunker(instructions):
             for opcode in OPCODES.keys():

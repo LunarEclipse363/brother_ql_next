@@ -15,7 +15,7 @@ class FormFactor(IntEnum):
     """
     #: rectangular die-cut labels
     DIE_CUT = 1
-    #: endless (continouse) labels
+    #: endless (continuous) labels
     ENDLESS = 2
     #: round die-cut labels
     ROUND_DIE_CUT = 3
@@ -67,6 +67,9 @@ class Label(object):
 
     @property
     def name(self) -> str:
+        """
+        Return a formatted, human-readable name for the label
+        """
         out = ""
 
         if 'x' in self.identifier:
@@ -114,7 +117,10 @@ ALL_LABELS = (
 )
 
 class LabelsManager(ElementsManager):
-    elements = copy.copy(ALL_LABELS)
+    """
+    Class for accessing the list of supported labels
+    """
+    elements = copy.copy(ALL_LABELS) #: :meta private:
     element_name = "label"
 
     def find_label_by_size(self, width: int, height: int):

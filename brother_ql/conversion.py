@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""
+This module offers a high-level API for converting images
+into a raster instruction file for the printer.
+"""
 
 from __future__ import division, unicode_literals
 from builtins import str
@@ -10,23 +13,20 @@ import PIL.ImageOps, PIL.ImageChops
 
 from brother_ql.raster import BrotherQLRaster
 from brother_ql.labels import LabelsManager, FormFactor
-from brother_ql.models import ModelsManager
 from brother_ql import BrotherQLUnsupportedCmd
 
 logger = logging.getLogger(__name__)
 
 logging.getLogger("PIL.PngImagePlugin").setLevel(logging.WARNING)
 
-def convert(qlr: BrotherQLRaster, images: list[str | Image.Image], label: str,  **kwargs):
+def convert(qlr: BrotherQLRaster, images: list[str | Image.Image], label: str, **kwargs):
     r"""Converts one or more images to a raster instruction file.
 
     :param qlr:
         An instance of the BrotherQLRaster class
-    :type qlr: :py:class:`brother_ql.raster.BrotherQLRaster`
     :param images:
         The images to be converted. They can be filenames or instances of Pillow's Image.
-    :type images: list(PIL.Image.Image) or list(str) images
-    :param str label:
+    :param label:
         Type of label the printout should be on.
     :param \**kwargs:
         See below
@@ -36,13 +36,21 @@ def convert(qlr: BrotherQLRaster, images: list[str | Image.Image], label: str,  
           Enable cutting after printing the labels.
         * **dither** (``bool``) --
           Instead of applying a threshold to the pixel values, approximate grey tones with dithering.
-        * **compress**
-        * **red**
-        * **rotate**
-        * **dpi_600**
-        * **hq**
-        * **threshold**
+        * **compress** (``bool``) --
+          Applies packbits compression to the image data in the raster
+        * **red** (``bool``) --
+          Enables generation of a red channel for use with supported printer/label combinations
+        * **rotate** --
+          Whether to rotate the image ("auto"|0|90|180|270)
+        * **dpi_600** (``bool``) --
+          Whether to enable 300x600dpi mode for supported printers (takes 600x600dpi input image)
+        * **hq** --
+          ???
+        * **threshold** (``int``) --
+          The threshold value to determine if a result pixel is black or white (0-255)
     """
+    # TODO: seems like `hq` or `pquality` is just not used, you should investigate
+
     label_specs = LabelsManager()[label]
 
     dots_printable = label_specs.dots_printable
@@ -195,7 +203,11 @@ def convert(qlr: BrotherQLRaster, images: list[str | Image.Image], label: str,  
 
 
 def filtered_hsv(im, filter_h, filter_s, filter_v, default_col=(255,255,255)):
-    """ https://stackoverflow.com/a/22237709/183995 """
+    """
+    https://stackoverflow.com/a/22237709/183995
+
+    :meta private:
+    """
 
     hsv_im = im.convert('HSV')
     H, S, V = 0, 1, 2

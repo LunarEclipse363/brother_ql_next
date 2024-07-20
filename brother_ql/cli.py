@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Python standard library
 from __future__ import print_function
@@ -13,7 +13,7 @@ import jsons
 # imports from this very package
 from brother_ql.models import ModelsManager
 from brother_ql.labels import LabelsManager
-from brother_ql.backends import available_backends, backend_factory
+from brother_ql.backends import available_backends
 
 
 logger = logging.getLogger('brother_ql')
@@ -140,6 +140,7 @@ def env(ctx: click.Context, *args, **kwargs):
 @click.option('-f', '--format', type=click.Choice(('default', 'json', 'raw_bytes', 'raw_base64', 'raw_hex')), default='default', help='Output Format.')
 @click.pass_context
 def status_cmd(ctx: click.Context, *args, **kwargs):
+    """ Prints status information from the chosen printer """
     from brother_ql.backends.helpers import status as status_fn
     try:
         status, raw = status_fn(printer_model=ctx.meta.get('MODEL'), printer_identifier=ctx.meta.get('PRINTER'), backend_identifier=ctx.meta.get('BACKEND'))
@@ -203,9 +204,10 @@ def print_cmd(ctx: click.Context, *args, **kwargs):
 @click.option('-f', '--filename-format', help="Filename format string. Default is: label{counter:04d}.png.")
 @click.pass_context
 def analyze_cmd(ctx: click.Context, *args, **kwargs):
+    """ Interprets a binary file containing raster instructions for Brother QL-Series printers """
     from brother_ql.reader import BrotherQLReader
     reader = BrotherQLReader(kwargs['instructions'])
-    filename_format = kwargs.get('filename_format') 
+    filename_format = kwargs.get('filename_format')
     if filename_format is not None:
         reader.filename_fmt = filename_format
     reader.analyse()
@@ -214,6 +216,7 @@ def analyze_cmd(ctx: click.Context, *args, **kwargs):
 @click.argument('instructions', type=click.File('rb'))
 @click.pass_context
 def send_cmd(ctx: click.Context, *args, **kwargs):
+    """ Sends a raw instructions file to the printer """
     from brother_ql.backends.helpers import send
     send(instructions=kwargs['instructions'].read(), printer_identifier=ctx.meta.get('PRINTER'), backend_identifier=ctx.meta.get('BACKEND'), blocking=True)
 

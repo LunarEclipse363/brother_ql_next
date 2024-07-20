@@ -40,6 +40,9 @@ class Model(object):
 
     @property
     def name(self) -> str:
+        """
+        Returns the printer identifier (already human-readable)
+        """
         return self.identifier
 
 ALL_MODELS = [
@@ -64,5 +67,8 @@ ALL_MODELS = [
 ]
 
 class ModelsManager(ElementsManager):
-    elements = copy.copy(ALL_MODELS)
+    """
+    Class for accessing the list of supported printer models
+    """
+    elements = copy.copy(ALL_MODELS) #: :meta private:
     element_name = 'model'

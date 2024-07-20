@@ -18,7 +18,7 @@ from PIL import Image
 
 from brother_ql.models import Model, ModelsManager
 
-from . import BrotherQLError, BrotherQLUnsupportedCmd, BrotherQLUnknownModel, BrotherQLRasterError
+from brother_ql import BrotherQLError, BrotherQLUnsupportedCmd, BrotherQLUnknownModel, BrotherQLRasterError
 
 from io import BytesIO
 
@@ -86,6 +86,7 @@ class BrotherQLRaster(object):
 
     @property
     def two_color_support(self):
+        """ :meta private: """
         return self.model.two_color
 
     def add_initialize(self):
@@ -112,16 +113,24 @@ class BrotherQLRaster(object):
         self.data += b'\x00' * self.num_invalidate_bytes
 
     @property
-    def mtype(self): return self._mtype
+    def mtype(self):
+        """ :meta private: """
+        return self._mtype
 
     @property
-    def mwidth(self): return self._mwidth
+    def mwidth(self):
+        """ :meta private: """
+        return self._mwidth
 
     @property
-    def mlength(self): return self._mlength
+    def mlength(self):
+        """ :meta private: """
+        return self._mlength
 
     @property
-    def pquality(self): return self._pquality
+    def pquality(self):
+        """ :meta private: """
+        return self._pquality
 
     @mtype.setter
     def mtype(self, value):

@@ -1,0 +1,23 @@
+/* Multiline function definitions...
+ * https://github.com/sphinx-doc/sphinx/issues/1514#issuecomment-742703082
+ * ... that only apply on functions with more than 2 parameters
+ * https://stackoverflow.com/a/74016670
+ * https://stackoverflow.com/a/77911336
+ */
+
+/* Newlines (\a) and spaces (\20) before each parameter */
+.sig-object:has(> :nth-child(3 of .sig-param)) .sig-param::before {
+    content: "\a\20\20\20\20";
+    white-space: pre;
+}
+
+/* Newline after the last parameter (so the closing bracket is on a new line) */
+.sig-object:has(> :nth-child(3 of .sig-param)) em.sig-param:last-of-type::after {
+    content: "\a";
+    white-space: pre;
+}
+
+/* Restore underlines for some links */
+.contents ul li a.reference, .toctree-wrapper ul li a.reference {
+    text-decoration-line: underline !important;
+}
