@@ -68,6 +68,8 @@ On those systems, extending the path variable via `export PATH="${PATH}:~/.local
 
 ## Usage
 
+For the Python API documentation, [see here](https://lunareclipse363.github.io/brother_ql_next/)
+
 The main user interface of this package is the command line tool `brother_ql`.
 
 ```
