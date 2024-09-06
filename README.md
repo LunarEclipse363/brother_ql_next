@@ -237,6 +237,7 @@ There are many ways to support the development of brother\_ql:
 
 * **File an issue** on Github, if you encounter problems, have a proposal, etc.
 * **Submit a pull request** on Github if you improved the code and know how to use git.
+* **Donate** an arbitrary amount of money via [Ko-Fi](https://ko-fi.com/lunareclipse363) or [see other options](https://lunareclipse.zone/about-me/#donations)
 
 Thanks to everyone helping to improve brother\_ql.
 
