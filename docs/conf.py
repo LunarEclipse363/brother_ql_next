@@ -6,10 +6,18 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+def _get_version():
+    # python 3.9 doesn't have tomllib so uhh...
+    with open('../pyproject.toml', 'r') as file:
+        for line in file:
+            if 'version' in line:
+                return line.split('"')[1]
+
+
 project = 'brother_ql_next'
 copyright = '2024 brother_ql_next Contributors.'
 author = 'LunarEclipse'
-release = '0.11.1'
+release = _get_version()
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
