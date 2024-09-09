@@ -186,7 +186,7 @@ def status_cmd(ctx: click.Context, *args, **kwargs):
 @click.pass_context
 def print_cmd(ctx: click.Context, *args, **kwargs):
     """ Print a label of the provided IMAGE. """
-    backend = ctx.meta.get('BACKEND', 'pyusb')
+    backend = ctx.meta.get('BACKEND')
     model = ctx.meta.get('MODEL')
     printer = ctx.meta.get('PRINTER')
     from brother_ql.conversion import convert
