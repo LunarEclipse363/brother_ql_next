@@ -5,11 +5,14 @@ on:
     types: [published]
 
 env:
-  python_version: 3.8
+  python_version: 3.9
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: publish
+    permissions:
+      id-token: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -23,9 +26,5 @@ jobs:
       - name: Build binary
         run: |
           python3 -m build
-      - name: Publish tp PyPi
-        run: python3 -m twine upload dist/*
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-          TWINE_REPOSITORY: pypi
+      - name: Publish to PyPi
+        uses: pypa/gh-action-pypi-publish@release/v1
