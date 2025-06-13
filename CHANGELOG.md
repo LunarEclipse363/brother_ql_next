@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [0.11.4] - 2025-06-13
 ### Fixed
 - The networked printer host can now be an IPv6 address (i.e. `tcp://[2001:db8:acab::420]:9100`)
 
@@ -59,3 +59,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Removed duplicated 103mm label - the "104" label - [matmair/brother_ql-inventree #20](https://github.com/matmair/brother_ql-inventree/pull/20)
 - Use 400 byte invalidate command for QL-8xx models - [matmair/brother_ql-inventree #26](https://github.com/matmair/brother_ql-inventree/pull/26)
+
+[unreleased]: https://github.com/LunarEclipse363/brother_ql_next/compare/v0.11.4...HEAD
+[0.11.4]: https://github.com/LunarEclipse363/brother_ql_next/releases/tag/v0.11.4
+[0.11.3]: https://github.com/LunarEclipse363/brother_ql_next/releases/tag/v0.11.3
+[0.11.2]: https://github.com/LunarEclipse363/brother_ql_next/releases/tag/v0.11.2
+[0.11.1]: https://github.com/LunarEclipse363/brother_ql_next/releases/tag/v0.11.1
+[0.11.0]: https://github.com/LunarEclipse363/brother_ql_next/releases/tag/v0.11.0
+[0.10.0]: https://github.com/LunarEclipse363/brother_ql_next/releases/tag/v0.10.0
