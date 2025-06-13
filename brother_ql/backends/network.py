@@ -7,6 +7,8 @@ Works cross-platform.
 
 from __future__ import unicode_literals
 from builtins import str
+import logging
+from urllib.parse import urlparse
 
 import socket, os, time, select
 
@@ -40,19 +42,37 @@ class BrotherQLBackendNetwork(BrotherQLBackendGeneric):
         # strategy : try_twice, select or socket_timeout
         self.strategy = 'socket_timeout'
         if isinstance(device_specifier, str):
-            if device_specifier.startswith('tcp://'):
-                device_specifier = device_specifier[6:]
-            host, _, port = device_specifier.partition(':')
-            if port:
-                port = int(port)
-            else:
+            if not device_specifier.startswith('tcp://'):
+                device_specifier = 'tcp://' + device_specifier
+
+            url = urlparse(device_specifier)
+            host = url.hostname
+            port = url.port
+
+            if not port:
                 port = 9100
-            #try:
-            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-            self.s.connect((host, port))
-            #except OSError as e:
-            #    raise ValueError('Could not connect to the device.')
+
+            addresses = socket.getaddrinfo(
+                host,
+                port,
+                family=socket.AF_UNSPEC,
+                type=socket.SOCK_STREAM,
+                proto=socket.IPPROTO_TCP,
+            )
+            exc = None
+            for (family, _, _, _, sockaddr) in addresses:
+                try:
+                    self.s = socket.socket(family, socket.SOCK_STREAM)
+                    self.s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+                    self.s.connect(sockaddr)
+                    exc = None
+                    break
+                except OSError as e:
+                    logging.warning(f"Failed to connect using address {sockaddr}: {e}")
+                    exc = e
+            if exc is not None:
+                raise exc
+
             if self.strategy == 'socket_timeout':
                 self.s.settimeout(self.read_timeout)
             elif self.strategy == 'try_twice':
