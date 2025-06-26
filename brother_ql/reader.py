@@ -18,6 +18,7 @@ OPCODES = {
     b'\x00':                 ("preamble",       -1, "Preamble, 200-300x 0x00 to clear comamnd buffer"),
     b'\x4D':                 ("compression",     1, ""),
     b'\x67':                 ("raster",         -1, ""),
+    b'\x5A':                 ("zeroline",        0, "raster line is filled in zero data"),
     b'\x77':                 ("2-color raster", -1, ""),
     b'\x0C':                 ("print",           0, "print intermediate page"),
     b'\x1A':                 ("print",           0, "print final page"),
