@@ -229,16 +229,50 @@ def send_cmd(ctx: click.Context, *args, **kwargs):
 def transpile_cmd(ctx: click.Context, *args, **kwargs):
     import brother_ql.reader as reader
 
+    output_model = ctx.meta['MODEL']
+    input_model = kwargs['input_model']
+
     # FIXME: this should support all the models the driver supports
     #  TODO: do a map to figure out what to downgrade to
     #  TODO: find a way to figure out what commands to drop automatically
-    if kwargs['input_model'] not in ("QL-580N", "QL-570"):
+    if input_model not in ("QL-580N", "QL-570"):
         logging.error("Model currently not supported")
         return 1
 
     data = kwargs['input'].read()
     processed = bytes()
     is_compressed = False
+
+    # TODO: check if we already keep this as a device parameter
+    if output_model in [
+        "QL-500",
+        "QL-550",
+        "QL-560",
+        "QL-570",
+        "QL-580N",
+        "QL-650TD",
+        "QL-700",
+        "QL-800",
+        "QL-810W",
+        "QL-820NWB",
+    ]:
+        output_model_raster_len = 90
+    elif output_model in [
+        "QL-600",
+        "QL-710W",
+        "QL-720NW",
+    ]:
+        output_model_raster_len = 104
+    elif output_model in [
+        "QL-1050",
+        "QL-1060N",
+        "QL-1100",
+        "QL-1110NWB",
+        "QL-1115NWB",
+    ]:
+        output_model_raster_len = 162
+    else:
+        raise Exception(f"Unknown output printer for transpile: {output_model}")
 
     for instruction in reader.chunker(data):
         for opcode in reader.OPCODES.keys():
@@ -272,9 +306,14 @@ def transpile_cmd(ctx: click.Context, *args, **kwargs):
                     else:
                         row = rpl
                     processed += instruction[:2]
-                    assert len(row) == 90 or len(row) == 162 # sanity check
+                    assert len(row) == output_model_raster_len
                     processed += len(row).to_bytes(length=1, byteorder='big')
                     processed += row
+                case "zeroline":
+                    processed += b'\x67\x00'
+                    processed += output_model_raster_len.to_bytes(length=1, byteorder='big')
+                    for _ in range(output_model_raster_len):
+                        processed += b'\x00'
                 case _:
                     processed += instruction
             break
