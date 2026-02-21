@@ -5,6 +5,7 @@ import copy
 
 from brother_ql.helpers import ElementsManager
 
+
 @attrs
 class Model(object):
     """
@@ -45,6 +46,7 @@ class Model(object):
         """
         return self.identifier
 
+
 ALL_MODELS = [
   Model('QL-500',     (295, 11811), compression=False, mode_setting=False, expanded_mode=False, cutting=False),
   Model('QL-550',     (295, 11811), compression=False, mode_setting=False),
@@ -66,6 +68,159 @@ ALL_MODELS = [
   Model('QL-1110NWB', (301, 35434), number_bytes_per_row=162, additional_offset_r=44),
   Model('QL-1115NWB', (301, 35434), number_bytes_per_row=162, additional_offset_r=44),
 ]
+
+
+class ModelsJsonSchema():
+    SCHEMA_V1 = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://brother-ql-next.lunareclipse.zone/pub/schemas/models-1.0.0",
+        "title": "Models",
+        "description": "List of supported label printer models",
+        "type": "object",
+        "properties": {
+            "$schema": {
+                "description": "Canonical URL of the schema used by this document",
+                "type": "string",
+                "format": "uri",
+            },
+            "$version": {
+                "description": "Version number following Semver 2.0, equal to the $schema version. Major version change indicates breaking changes.",
+                "type": "string",
+                "pattern": r"^(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*)(?:-(?<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$",
+            },
+            "models": {
+                "description": "The models dict",
+                "type": "object",
+                "items": {
+                    "type": "object",
+                    "patternProperties": {
+                        "[A-Za-z_][A-Za-z0-9_]*": {
+                            "title": "Model",
+                            "description": "The description of the properties of a single model",
+                            "type": "object",
+                            "properties": {
+                                "lengthDots": {
+                                    "title": "Length (dots)",
+                                    "description": "Minimum and maximum tape lengths, in dots, supported by this printer.",
+                                    "type": "object",
+                                    "properties": {
+                                        "min": {
+                                            "type": "integer",
+                                        },
+                                        "max": {
+                                            "type": "integer",
+                                        },
+                                    },
+                                    "required": ["min", "max"],
+                                    "additionalProperties": False,
+                                },
+                                "feedDots": {
+                                    "title": "Feed (dots)",
+                                    "description": "Supported amounts of feed (start/end margins) in dots.",
+                                    "type": "object",
+                                    "properties": {
+                                        "min": {
+                                            "type": "integer",
+                                        },
+                                        "max": {
+                                            "type": "integer",
+                                        },
+                                    },
+                                    "required": ["min", "max"],
+                                    "additionalProperties": False,
+                                },
+                                "bytesPerRow": {
+                                    "title": "Bytes per row",
+                                    "description": "Number of bytes per row printed. Multiply by 8 for number of dots spanning the print head's full width.",
+                                    "type": "integer",
+                                },
+                                "additionalOffsetRight": {
+                                    "title": "Additional right-offset",
+                                    "type": "integer",
+                                },
+                                "invalidateBytes": {
+                                    "description": "Number of NULL bytes sent for an invalidate command.",
+                                    "type": "integer"
+                                },
+                                "features": {
+                                    "title": "Features",
+                                    "type": "object",
+                                    "properties": {
+                                        "modeSetting": {
+                                            "description": "Support for the mode setting opcode.",
+                                            "type": "boolean",
+                                        },
+                                        "cutting": {
+                                            "description": "Printer has an automatic label cutting blade.",
+                                            "type": "boolean",
+                                        },
+                                        "expandedMode": {
+                                            "description": "Support for the expanded mode opcode.",
+                                            "type": "boolean",
+                                        },
+                                        "compression": {
+                                            "description": "Support for compressed raster data.",
+                                            "type": "boolean",
+                                        },
+                                        "twoColor": {
+                                            "description": "Support for two color printing (black/red/white), requires special labels.",
+                                            "type": "boolean",
+                                        },
+                                    },
+                                    "required": ["modeSetting", "cutting", "expandedMode", "compression", "twoColor"],
+                                },
+                            },
+                            "required": ["lengthDots", "feedDots", "bytesPerRow", "additionalOffsetRight", "invalidateBytes", "features"],
+                        },
+                    },
+                    "additionalProperties": False,
+                },
+            },
+        },
+        "required": ["$schema", "$version", "models"],
+    }
+    
+    @classmethod
+    def schema(cls, version=1):
+        """Returns the schema in a json-able form"""
+
+        if version != 1:
+            raise Exception("Unsupported schema version")
+        
+        return cls.SCHEMA_V1
+
+    @classmethod
+    def all_models(cls, version=1):
+        """Returns the supported models list in a json-able form"""
+
+        if version != 1:
+            raise Exception("Unsupported schema version")
+
+        models_object = {
+            "$schema": "https://brother-ql-next.lunareclipse.zone/pub/schemas/models-1.0.0",
+            "$version": "1.0.0",
+            "models": {},
+        }
+
+        for model in ALL_MODELS:
+            model_object = {
+                "lengthDots": { "min": model.min_max_length_dots[0], "max": model.min_max_length_dots[1] },
+                "feedDots": { "min": model.min_max_feed[0], "max": model.min_max_feed[1] },
+                "bytesPerRow": model.number_bytes_per_row,
+                "additionalOffsetRight": model.additional_offset_r,
+                "invalidateBytes": model.num_invalidate_bytes,
+                "features": {
+                    "modeSetting": model.mode_setting,
+                    "cutting": model.cutting,
+                    "expandedMode": model.expanded_mode,
+                    "compression": model.compression,
+                    "twoColor": model.two_color,
+                },
+            }
+            models_object["models"][model.identifier] = model_object
+
+        return models_object
+
 
 class ModelsManager(ElementsManager):
     """
