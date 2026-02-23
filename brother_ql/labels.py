@@ -7,6 +7,7 @@ import copy
 from brother_ql.helpers import ElementsManager
 from brother_ql.models import ModelsManager
 
+
 class FormFactor(IntEnum):
     """
     Enumeration representing the form factor of a label.
@@ -20,6 +21,7 @@ class FormFactor(IntEnum):
     #: round die-cut labels
     ROUND_DIE_CUT = 3
 
+
 class Color(IntEnum):
     """
     Enumeration representing the colors to be printed on a label. Most labels only support printing black on white.
@@ -29,6 +31,7 @@ class Color(IntEnum):
     BLACK_WHITE = 0
     #: The label can be printed in black, white & red.
     BLACK_RED_WHITE = 1
+
 
 @attrs
 class Label(object):
@@ -84,6 +87,7 @@ class Label(object):
 
         return out
 
+
 ALL_LABELS = (
   Label("12",     ( 12,   0), FormFactor.ENDLESS,       ( 142,    0), ( 106,    0),  29, feed_margin=35),
   Label("18",     ( 18,   0), FormFactor.ENDLESS,       ( 256,    0), ( 234,    0), 171, feed_margin=14),
@@ -115,6 +119,189 @@ ALL_LABELS = (
   Label("d24",    ( 24,  24), FormFactor.ROUND_DIE_CUT, ( 284,  284), ( 236,  236),  42 ),
   Label("d58",    ( 58,  58), FormFactor.ROUND_DIE_CUT, ( 688,  688), ( 618,  618),  51 ),
 )
+
+
+class LabelsJsonSchema():
+    SCHEMA_V1 = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://brother-ql-next.lunareclipse.zone/pub/schemas/labels-1.0.0",
+        "$defs": {
+            "EnumIdentifier": {
+                "type": "string",
+                "pattern": "[A-Z_][A-Z0-9_]*",
+            },
+            "IntegerDimensions": {
+                "type": "object",
+                "properties": {
+                    "width": {
+                        "type": "integer",
+                    },
+                    "length": {
+                        "type": "integer",
+                    },
+                },
+                "required": ["width", "length"],
+            },
+        },
+        "title": "Models",
+        "description": "List of supported label printer models",
+        "type": "object",
+        "properties": {
+            "$schema": {
+                "description": "Canonical URL of the schema used by this document",
+                "type": "string",
+                "format": "uri",
+            },
+            "$version": {
+                "description": "Version number following Semver 2.0, equal to the $schema version. Major version change indicates breaking changes.",
+                "type": "string",
+                "pattern": r"^(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*)(?:-(?<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$",
+            },
+            "labels": {
+                "description": "The labels dict",
+                "type": "object",
+                "patternProperties": {
+                    "[A-Za-z0-9_]+": {
+                        "title": "Model",
+                        "description": "The description of the properties of a single model",
+                        "type": "object",
+                        "properties": {
+                            "tapeSize": {
+                                "description": "Label dimensions in milimeters. Zero length means continuous label tape.",
+                                "$ref": "#/$defs/IntegerDimensions",
+                            },
+                            "formFactor": {
+                                "description": "Type of label.",
+                                "anyOf": [
+                                    {
+                                        "type": "string",
+                                        "enum": ["DIE_CUT", "ENDLESS", "ROUND_DIE_CUT"],
+                                    },
+                                    {
+                                        "$ref": "#/$defs/EnumIdentifier",
+                                    },
+                                ],
+                            },
+                            "areaTotalDots": {
+                                "description": "Full dimensions of the label, in dots, at 300DPI.",
+                                "$ref": "#/$defs/IntegerDimensions",
+                            },
+                            "areaPrintableDots": {
+                                "description": "Printable dimensions of the label, in dots, excluding margins, at 300DPI.",
+                                "$ref": "#/$defs/IntegerDimensions",
+                            },
+                            "offsetRight": {
+                                "description": "The required offset from the right side of the label in dots to obtain a centered printout.",
+                                "type": "integer",
+                            },
+                            "feedMarginDots": {
+                                "description": "An additional amount of feeding when printing the label."
+                                               "This is non-zero for some smaller label sizes and for endless labels.",
+                                "type": "integer",
+                            },
+                            "restrictedToModels": {
+                                "description": "If a label is only compatible with some printers, this lists them, otherwise null.",
+                                "type": ["array", "null"],
+                                "items": {
+                                    "type": "string",
+                                    "pattern": "[A-Za-z_][A-Za-z0-9_]*",
+                                },
+                            },
+                            "color": {
+                                "description": "Whether this labels supports multi-color printing with special labels.",
+                                "anyOf": [
+                                    {
+                                        "type": "string",
+                                        "enum": ["BLACK_WHITE", "BLACK_RED_WHITE"],
+                                    },
+                                    {
+                                        "$ref": "#/$defs/EnumIdentifier",
+                                    },
+                                ],
+                            },
+                        },
+                        "required": [
+                            "tapeSize",
+                            "formFactor",
+                            "areaTotalDots",
+                            "areaPrintableDots",
+                            "offsetRight",
+                            "feedMarginDots",
+                            "restrictedToModels",
+                            "color",
+                        ],
+                    },
+                },
+                "additionalProperites": False,
+            },
+        },
+        "required": ["$schema", "$version", "labels"]
+    }
+
+    @classmethod
+    def schema(cls, version=1):
+        """Returns the schema in a json-able form"""
+
+        if version != 1:
+            raise Exception("Unsupported schema version")
+
+        return cls.SCHEMA_V1
+
+    @classmethod
+    def all_labels(cls, version=1):
+        """Returns the supported models list in a json-able form"""
+
+        if version != 1:
+            raise Exception("Unsupported schema version")
+
+        labels_object = {
+            "$schema": "https://brother-ql-next.lunareclipse.zone/pub/schemas/labels-1.0.0",
+            "$version": "1.0.0",
+            "labels": {},
+        }
+
+        for label in ALL_LABELS:
+            form_factor = None
+            match label.form_factor:
+                case FormFactor.DIE_CUT:
+                    form_factor = "DIE_CUT"
+                case FormFactor.ENDLESS:
+                    form_factor = "ENDLESS"
+                case FormFactor.ROUND_DIE_CUT:
+                    form_factor = "ROUND_DIE_CUT"
+            assert form_factor is not None
+
+            color = None
+            match label.color:
+                case Color.BLACK_WHITE:
+                    color = "BLACK_WHITE"
+                case Color.BLACK_RED_WHITE:
+                    color = "BLACK_RED_WHITE"
+            assert color is not None
+            
+            label_object = {
+                "tapeSize": {
+                    "width": label.tape_size[0],
+                    "length": label.tape_size[1],
+                },
+                "formFactor": form_factor,
+                "areaTotalDots": {
+                    "width": label.dots_total[0],
+                    "length": label.dots_total[1],
+                },
+                "areaPrintableDots": {
+                    "width": label.dots_printable[0],
+                    "length": label.dots_printable[1],
+                },
+                "offsetRight": label.offset_r,
+                "feedMarginDots": label.feed_margin,
+                "restrictedToModels": None if len(label.restricted_to_models) == 0 else label.restricted_to_models,
+                "color": color,
+            }
+            labels_object["labels"][label.identifier] = label_object
+
+        return labels_object
+
 
 class LabelsManager(ElementsManager):
     """
