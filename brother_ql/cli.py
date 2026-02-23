@@ -46,12 +46,14 @@ def cli(ctx: click.Context, *args, **kwargs):
 
     logging.basicConfig(level='DEBUG' if debug else 'INFO')
 
+
 @cli.command()
 @click.pass_context
 def discover(ctx: click.Context):
     """ find connected label printers """
     backend = ctx.meta.get('BACKEND', 'pyusb')
     discover_and_list_available_devices(backend)
+
 
 def discover_and_list_available_devices(backend):
     from brother_ql.backends.helpers import discover
@@ -60,11 +62,14 @@ def discover_and_list_available_devices(backend):
     log_discovered_devices(available_devices)
     print(textual_description_discovered_devices(available_devices))
 
+
 @cli.group()
 @click.pass_context
 def info(ctx: click.Context, *args, **kwargs):
     """ list available labels, models etc. """
 
+
+# TODO: add flag to print json schema
 @info.command(name='models')
 @click.option("--json", is_flag=True)
 @click.pass_context
@@ -79,6 +84,8 @@ def models_cmd(ctx: click.Context, *args, **kwargs):
         print('Supported models:')
         for model in ModelsManager().identifiers(): print(" " + model)
 
+
+# TODO: add flag to print json schema
 @info.command()
 @click.option("--json", is_flag=True)
 @click.pass_context
@@ -92,6 +99,7 @@ def labels(ctx: click.Context, *args, **kwargs):
     else:
         from brother_ql.output_helpers import textual_label_description
         print(textual_label_description(LabelsManager().identifiers()))
+
 
 @info.command()
 @click.pass_context
@@ -136,6 +144,30 @@ def env(ctx: click.Context, *args, **kwargs):
         print(fmt.format(req=proj, spec=spec, ins_vers=req_pkg.version))
     print("\n##################\n")
 
+
+class StatusJsonSchema():
+    # TODO
+    SCHEMA_V1 = {}
+
+    @classmethod
+    def schema(cls, version=1):
+        """Returns the schema in a json-able form"""
+
+        if version != 1:
+            raise Exception("Unsupported schema version")
+
+        return cls.SCHEMA_V1
+
+    @classmethod
+    def convert(cls, data, version=1):
+        """Returns the supported labels list in a json-able form"""
+
+        if version != 1:
+            raise Exception("Unsupported schema version")
+
+        # TODO
+
+# TODO: add flag to print json schema
 @cli.command('status', short_help='request status information from the printer')
 @click.option('-f', '--format', type=click.Choice(('default', 'json', 'raw_bytes', 'raw_base64', 'raw_hex')), default='default', help='Output Format.')
 @click.pass_context
@@ -164,6 +196,7 @@ def status_cmd(ctx: click.Context, *args, **kwargs):
             for e in status["errors"]:
                 print(f"  + {e}")
     elif kwargs["format"] == 'json':
+        # TODO: use json schema
         print(jsons.dumps(status))
     elif kwargs["format"] == 'raw_bytes':
         sys.stdout.buffer.write(raw)
@@ -171,6 +204,7 @@ def status_cmd(ctx: click.Context, *args, **kwargs):
         sys.stdout.buffer.write(base64.encodebytes(raw))
     elif kwargs["format"] == 'raw_hex':
         print(raw.hex())
+
 
 @cli.command('print', short_help='print a label')
 @click.argument('images', nargs=-1, type=click.File('rb'), metavar='IMAGE [IMAGE] ...')
@@ -199,6 +233,7 @@ def print_cmd(ctx: click.Context, *args, **kwargs):
     instructions = convert(qlr=qlr, **kwargs)
     send(instructions=instructions, printer_identifier=printer, backend_identifier=backend, blocking=True)
 
+
 @cli.command(name='analyze', help='interpret a binary file containing raster instructions for the Brother QL-Series printers')
 @click.argument('instructions', type=click.File('rb'))
 @click.option('-f', '--filename-format', help="Filename format string. Default is: label{counter:04d}.png.")
@@ -212,6 +247,7 @@ def analyze_cmd(ctx: click.Context, *args, **kwargs):
         reader.filename_fmt = filename_format
     reader.analyse()
 
+
 @cli.command(name='send', short_help='send an instruction file to the printer')
 @click.argument('instructions', type=click.File('rb'))
 @click.pass_context
@@ -219,6 +255,7 @@ def send_cmd(ctx: click.Context, *args, **kwargs):
     """ Sends a raw instructions file to the printer """
     from brother_ql.backends.helpers import send
     send(instructions=kwargs['instructions'].read(), printer_identifier=ctx.meta.get('PRINTER'), backend_identifier=ctx.meta.get('BACKEND'), blocking=True)
+
 
 if __name__ == '__main__':
     cli()
