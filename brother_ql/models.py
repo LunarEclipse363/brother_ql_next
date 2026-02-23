@@ -91,102 +91,99 @@ class ModelsJsonSchema():
             "models": {
                 "description": "The models dict",
                 "type": "object",
-                "items": {
-                    "type": "object",
-                    "patternProperties": {
-                        "[A-Za-z_][A-Za-z0-9_]*": {
-                            "title": "Model",
-                            "description": "The description of the properties of a single model",
-                            "type": "object",
-                            "properties": {
-                                "lengthDots": {
-                                    "title": "Length (dots)",
-                                    "description": "Minimum and maximum tape lengths, in dots, supported by this printer.",
-                                    "type": "object",
-                                    "properties": {
-                                        "min": {
-                                            "type": "integer",
-                                        },
-                                        "max": {
-                                            "type": "integer",
-                                        },
+                "patternProperties": {
+                    "[A-Za-z_][A-Za-z0-9_]*": {
+                        "title": "Model",
+                        "description": "The description of the properties of a single model",
+                        "type": "object",
+                        "properties": {
+                            "lengthDots": {
+                                "title": "Length (dots)",
+                                "description": "Minimum and maximum tape lengths, in dots, supported by this printer.",
+                                "type": "object",
+                                "properties": {
+                                    "min": {
+                                        "type": "integer",
                                     },
-                                    "required": ["min", "max"],
-                                    "additionalProperties": False,
-                                },
-                                "feedDots": {
-                                    "title": "Feed (dots)",
-                                    "description": "Supported amounts of feed (start/end margins) in dots.",
-                                    "type": "object",
-                                    "properties": {
-                                        "min": {
-                                            "type": "integer",
-                                        },
-                                        "max": {
-                                            "type": "integer",
-                                        },
+                                    "max": {
+                                        "type": "integer",
                                     },
-                                    "required": ["min", "max"],
-                                    "additionalProperties": False,
                                 },
-                                "bytesPerRow": {
-                                    "title": "Bytes per row",
-                                    "description": "Number of bytes per row printed. Multiply by 8 for number of dots spanning the print head's full width.",
-                                    "type": "integer",
-                                },
-                                "additionalOffsetRight": {
-                                    "title": "Additional right-offset",
-                                    "type": "integer",
-                                },
-                                "invalidateBytes": {
-                                    "description": "Number of NULL bytes sent for an invalidate command.",
-                                    "type": "integer"
-                                },
-                                "features": {
-                                    "title": "Features",
-                                    "type": "object",
-                                    "properties": {
-                                        "modeSetting": {
-                                            "description": "Support for the mode setting opcode.",
-                                            "type": "boolean",
-                                        },
-                                        "cutting": {
-                                            "description": "Printer has an automatic label cutting blade.",
-                                            "type": "boolean",
-                                        },
-                                        "expandedMode": {
-                                            "description": "Support for the expanded mode opcode.",
-                                            "type": "boolean",
-                                        },
-                                        "compression": {
-                                            "description": "Support for compressed raster data.",
-                                            "type": "boolean",
-                                        },
-                                        "twoColor": {
-                                            "description": "Support for two color printing (black/red/white), requires special labels.",
-                                            "type": "boolean",
-                                        },
-                                    },
-                                    "required": ["modeSetting", "cutting", "expandedMode", "compression", "twoColor"],
-                                },
+                                "required": ["min", "max"],
+                                "additionalProperties": False,
                             },
-                            "required": ["lengthDots", "feedDots", "bytesPerRow", "additionalOffsetRight", "invalidateBytes", "features"],
+                            "feedDots": {
+                                "title": "Feed (dots)",
+                                "description": "Supported amounts of feed (start/end margins) in dots.",
+                                "type": "object",
+                                "properties": {
+                                    "min": {
+                                        "type": "integer",
+                                    },
+                                    "max": {
+                                        "type": "integer",
+                                    },
+                                },
+                                "required": ["min", "max"],
+                                "additionalProperties": False,
+                            },
+                            "bytesPerRow": {
+                                "title": "Bytes per row",
+                                "description": "Number of bytes per row printed. Multiply by 8 for number of dots spanning the print head's full width.",
+                                "type": "integer",
+                            },
+                            "additionalOffsetRight": {
+                                "title": "Additional right-offset",
+                                "type": "integer",
+                            },
+                            "invalidateBytes": {
+                                "description": "Number of NULL bytes sent for an invalidate command.",
+                                "type": "integer"
+                            },
+                            "features": {
+                                "title": "Features",
+                                "type": "object",
+                                "properties": {
+                                    "modeSetting": {
+                                        "description": "Support for the mode setting opcode.",
+                                        "type": "boolean",
+                                    },
+                                    "cutting": {
+                                        "description": "Printer has an automatic label cutting blade.",
+                                        "type": "boolean",
+                                    },
+                                    "expandedMode": {
+                                        "description": "Support for the expanded mode opcode.",
+                                        "type": "boolean",
+                                    },
+                                    "compression": {
+                                        "description": "Support for compressed raster data.",
+                                        "type": "boolean",
+                                    },
+                                    "twoColor": {
+                                        "description": "Support for two color printing (black/red/white), requires special labels.",
+                                        "type": "boolean",
+                                    },
+                                },
+                                "required": ["modeSetting", "cutting", "expandedMode", "compression", "twoColor"],
+                            },
                         },
+                        "required": ["lengthDots", "feedDots", "bytesPerRow", "additionalOffsetRight", "invalidateBytes", "features"],
                     },
-                    "additionalProperties": False,
                 },
+                "additionalProperties": False,
             },
         },
         "required": ["$schema", "$version", "models"],
     }
-    
+
     @classmethod
     def schema(cls, version=1):
         """Returns the schema in a json-able form"""
 
         if version != 1:
             raise Exception("Unsupported schema version")
-        
+
         return cls.SCHEMA_V1
 
     @classmethod
