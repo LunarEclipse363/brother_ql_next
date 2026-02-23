@@ -249,7 +249,7 @@ class LabelsJsonSchema():
 
     @classmethod
     def all_labels(cls, version=1):
-        """Returns the supported models list in a json-able form"""
+        """Returns the supported labels list in a json-able form"""
 
         if version != 1:
             raise Exception("Unsupported schema version")
