@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+- Support for QL-1110NWB
+
+### Changed
+- Aligned `pyproject.toml` with [PEP 639](https://peps.python.org/pep-0639/), this is supported by setuptools 77.0.3 or later
+
+### Fixed
+- Serial number display for `brother_ql discover`
+- Version display for `brother_ql --version`
+
+### Removed
+- Unused dependencies (for unsupported Python versions)
+
 ## [0.11.4] - 2025-06-13
 ### Fixed
 - The networked printer host can now be an IPv6 address (i.e. `tcp://[2001:db8:acab::420]:9100`)
