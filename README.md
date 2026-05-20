@@ -22,7 +22,7 @@ The following printers are claimed to be supported (✓ means verified by the au
 * QL-700 (✓), QL-710W (✓), QL-720NW (✓)
 * QL-800 (✓), QL-810W (✓), QL-820NWB (✓)
 * QL-1050 (✓), QL-1060N (✓)
-* QL-1100 (✓), QL-1100NWB, QL-1115NWB
+* QL-1100 (✓), QL-1100NWB, QL-1110NWB, QL-1115NWB
 
 The new QL-800 series can print labels with two colors (black and red) on DK-22251 labels.
 
