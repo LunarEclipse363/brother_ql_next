@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.12.0] - 2026-05-20
 ### Added
 - Support for QL-1110NWB
 
@@ -75,6 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use 400 byte invalidate command for QL-8xx models - [matmair/brother_ql-inventree #26](https://github.com/matmair/brother_ql-inventree/pull/26)
 
 [unreleased]: https://github.com/LunarEclipse363/brother_ql_next/compare/v0.11.4...HEAD
+[0.12.0]: https://github.com/LunarEclipse363/brother_ql_next/releases/tag/v0.12.0
 [0.11.4]: https://github.com/LunarEclipse363/brother_ql_next/releases/tag/v0.11.4
 [0.11.3]: https://github.com/LunarEclipse363/brother_ql_next/releases/tag/v0.11.3
 [0.11.2]: https://github.com/LunarEclipse363/brother_ql_next/releases/tag/v0.11.2
