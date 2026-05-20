@@ -25,7 +25,7 @@ printer_help = "The identifier for the printer. This could be a string like tcp:
 @click.option('-m', '--model', type=click.Choice(ModelsManager().identifiers()), envvar='BROTHER_QL_MODEL')
 @click.option('-p', '--printer', metavar='PRINTER_IDENTIFIER', envvar='BROTHER_QL_PRINTER', help=printer_help)
 @click.option('--debug', is_flag=True)
-@click.version_option()
+@click.version_option(package_name='brother_ql_next')
 @click.pass_context
 def cli(ctx: click.Context, *args, **kwargs):
     """ Command line interface for the brother_ql Python package. """
