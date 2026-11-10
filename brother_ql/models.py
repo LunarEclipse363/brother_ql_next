@@ -46,7 +46,7 @@ class Model(object):
         return self.identifier
 
 ALL_MODELS = [
-  Model('QL-500',     (295, 11811), compression=False, mode_setting=False, expanded_mode=False, cutting=False),
+  Model('QL-500',     (130, 11811), compression=False, mode_setting=False, expanded_mode=False, cutting=False),
   Model('QL-550',     (295, 11811), compression=False, mode_setting=False),
   Model('QL-560',     (295, 11811), compression=False, mode_setting=False),
   Model('QL-570',     (150, 11811), compression=False, mode_setting=False),
